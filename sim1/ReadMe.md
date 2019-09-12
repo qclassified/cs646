@@ -1,4 +1,4 @@
-# Sim01
+# Project 1 - Sim01
 
 #### CS 646 Principles of Computer Operating Systems
 
@@ -6,8 +6,13 @@
 
 #### Farhan Sadique
 
-## 
 
+## Make and run
+
+```
+make
+./sim1 sim1.conf
+```
 
 ## Error Handling and Test Cases
 
