@@ -14,6 +14,21 @@ make
 ./sim1 sim1.conf
 ```
 
+## Program Flow
+* Open and verify (details below) config file
+* Read through config file and sets log mode to monitor/file/both
+* Read each line of config file -> store config in struct -> log config
+* Close config file
+* Open meta file
+* Store entire content of meta file to buffer string
+* Look for Start Program Meta-Data Code:
+* Begin parsing meta-file after Start Program Meta-Data Code: is detected
+* Read and validate (explained below) each meta-data code
+* Log each meta-data code to monitor/file/both
+* Stop when End Program Meta-Data Code: is detected
+* If End Program Meta-Data Code: is not detected stop when EOF reached and raise error
+* Close meta file
+
 ## Error Handling and Test Cases
 
 
