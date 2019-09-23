@@ -639,7 +639,7 @@ void simulator(FILE *fmeta, struct Config conf){
         
         codeVdesc(token, code, desc);                     // Validate code and descriptor 
         int c = verifycycle(code, desc, cycle);           // Validate cycle value
-		int mstot = getmstot(c, desc, conf);              // total msec for operation
+        int mstot = getmstot(c, desc, conf);              // total msec for operation
 
         
         _log("\n%s{%s}%s - %d ms\n", code, desc, cycle, mstot); // Debug
