@@ -583,6 +583,28 @@ int verifycycle(const char *code, const char *desc, const char *cycle){
 }
 
 
+int getmstot(int c, const char *desc, struct Config conf){
+    // Calculate total msec for operation
+	
+    int mspc;            // millisesconds per cycle
+    
+    if (streq(desc, "hard drive"))    mspc = conf.hdd;
+    else if (streq(desc, "keyboard")) mspc = conf.keyboard;
+    else if (streq(desc, "mouse"))    mspc = conf.mouse;
+    else if (streq(desc, "monitor"))  mspc = conf.monitor;
+    else if (streq(desc, "run"))      mspc = conf.processor;
+    else if (streq(desc, "allocate")) mspc = conf.memory;
+    else if (streq(desc, "printer"))  mspc = conf.printer;
+    else if (streq(desc, "block"))    mspc = conf.memory;
+    else mspc = 0;
+    
+    if (mspc == 0 && !streq(desc, "begin") && !streq(desc, "finish"))
+        logerror("\nError -- '%s' cycle time not given in config file", desc);
+    
+	return c*mspc;    // Total time for operation
+}
+
+	
 void simulator(FILE *fmeta, struct Config conf){
     // Simulates meta-file
     struct Pcb pcb1;
@@ -617,24 +639,8 @@ void simulator(FILE *fmeta, struct Config conf){
         
         codeVdesc(token, code, desc);                     // Validate code and descriptor 
         int c = verifycycle(code, desc, cycle);           // Validate cycle value
-    
-        // Calculate total time 
-        int mspc;            // millisesconds per cycle
-        
-        if (streq(desc, "hard drive"))    mspc = conf.hdd;
-        else if (streq(desc, "keyboard")) mspc = conf.keyboard;
-        else if (streq(desc, "mouse"))    mspc = conf.mouse;
-        else if (streq(desc, "monitor"))  mspc = conf.monitor;
-        else if (streq(desc, "run"))      mspc = conf.processor;
-        else if (streq(desc, "allocate")) mspc = conf.memory;
-        else if (streq(desc, "printer"))  mspc = conf.printer;
-        else if (streq(desc, "block"))    mspc = conf.memory;
-        else mspc = 0;
-        
-        if (mspc == 0 && !streq(desc, "begin") && !streq(desc, "finish"))
-            logerror("\nError -- '%s' cycle time not given in config file", desc);
-        
-        int mstot = c*mspc;    // Total time for operation
+		int mstot = getmstot(c, desc, conf);              // total msec for operation
+
         
         _log("\n%s{%s}%s - %d ms\n", code, desc, cycle, mstot); // Debug
         
@@ -659,13 +665,13 @@ void simulator(FILE *fmeta, struct Config conf){
         } else if ( *code == 'P' ){
             pcb1.state = RUNNING;
             _log("%.6f - Process %d: start processing action\n", now(), proccount);
-            pcb1.state = WAITING;
             wait(mstot);
-            pcb1.state = RUNNING;
             _log("%.6f - Process %d: end processing action\n", now(), proccount);
         } else if ( *code == 'I' || *code == 'O' ){
             struct Io_d io1 = {mstot, proccount, code, desc};
+			pcb1.state = WAITING;
             io_thread(&io1);
+			pcb1.state = RUNNING;
         } else if (*code == 'M'){
             if (streq(desc, "block")){
                 _log("%.6f - Process %d: start memory blocking\n", now(), proccount);
@@ -681,7 +687,7 @@ void simulator(FILE *fmeta, struct Config conf){
             }
         }
         
-        //_log("Program state: %d\n", pcb1.state);        // Debug
+        _log("Program state: %d\n", pcb1.state);        // Debug
     }
     
     logerror("\nError -- 'End Program Meta-Data Code:' not found");
