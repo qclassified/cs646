@@ -13,26 +13,25 @@
 */
 
 
-#include <stdarg.h>                              // va_start(), va_end()
-#include <stdio.h>                               // vprintf(), FILE(), fopen() ...
-#include <stdlib.h>                              // exit(), malloc(), rand()
-#include <pthread.h>                             // pthread_create(), pthread_join(), pthread_t
-#include <time.h>                                // clock(), clock_t
+#include <stdarg.h>                               // va_start(), va_end()
+#include <stdio.h>                                // vprintf(), FILE(), fopen() ...
+#include <stdlib.h>                               // exit(), malloc(), rand()
+#include <pthread.h>                              // pthread_create(), pthread_join(), pthread_t
+#include <time.h>                                 // clock(), clock_t
 
-// Typdef boolean
-typedef enum { false, true } bool;
+typedef enum { false, true } bool;                // Typdef boolean
 
 /* Global Variables */
 bool log2mon = 1, log2file = 0;                   // Flag - log to monitor, file
-char log_fname[50];                                  // log file name
-FILE *logfile;                                      // log file 
+char log_fname[50];                               // log file name
+FILE *logfile;                                    // log file 
                                                   
 /* Structure / Enum definitions */                   
-struct Fin {char type[10], ext[10];};              // Used to validate config/meta file
-struct Io_d {                                      // Used to pass data to I/O thread
+struct Fin {char type[10], ext[10];};             // Used to validate config/meta file
+struct Io_d {                                     // Used to pass data to I/O thread
     int msec, proccount; char *code, *desc; 
 };                                                
-struct Config {                                      // Configuration 
+struct Config {                                   // Configuration 
     int monitor, processor, mouse, hdd, keyboard, memory, printer, memkb;
     char version[10], meta_fname[50], logmode[20], log_fname[50]; 
 };                                                
@@ -40,42 +39,42 @@ enum pcb_s {START, READY, RUNNING, WAITING, EXIT};// pcb states
 struct Pcb { enum pcb_s state;};                  // struct to store simulator pcb state
                                                   
                                                   
-// ============== Function Declarations ==============  
+// ============ Function Declarations ==========  
                                                   
-// ========== Thead & Time Functions ==========   
-double now();                                      // time (second) elapsed from start of program 
+// ========== Thead & Time Functions ===========   
+double now();                                     // time (second) elapsed from start of program 
 void wait(int msec);                              // countdown timer, sleep for msec
 void *wait_t(void *arg);                          // entry point for I/) thread
 void io_thread(struct Io_d *io_ptr);              // creates I/O thread including logging and wait
 
-// ============= String Functions =============
-int    _atoi(const char *str);                          // convert string to integer (own impelementation of atoi)
+// ============= String Functions ==============
+int    _atoi(const char *str);                    // convert string to integer (own impelementation of atoi)
 bool isspace(int c);                              // true if character c is whitespace
-bool isempty(const char *str);                      // true if string str is empty (whitespace)
+bool isempty(const char *str);                    // true if string str is empty (whitespace)
 bool isinteger(const char *str);                  // true if string str is valid integer
-int _strlen(const char *str);                      // number of characters in string (own impelementation of strlen)
-bool streq(const char *s1, const char *s2);          // true if strings s1 and s2 are equal
+int _strlen(const char *str);                     // number of characters in string (own impelementation of strlen)
+bool streq(const char *s1, const char *s2);       // true if strings s1 and s2 are equal
 void strtrim(char* str);                          // removes leading/trailing/multiple whitespace
-char *tolowerstr(char str[]);                      // makes string str lowercase
-char *strcpy(char *dest, const char *src);          // copy value of string src to dest
-char *strdup(const char *str);                      // copy string with proper memory allocation (strcpy with malloc)
-char *strchr(const char *s, int c);                  // position of c in s
+char *tolowerstr(char str[]);                     // makes string str lowercase
+char *strcpy(char *dest, const char *src);        // copy value of string src to dest
+char *strdup(const char *str);                    // copy string with proper memory allocation (strcpy with malloc)
+char *strchr(const char *s, int c);               // position of c in s
 char *strsep(char **stringp, const char *delim);  // tokenize stringp at delimeters delim
                                                   
-// ============== I/O Functions ==============    
-int _log(const char *format, ...);                  // logs to monitor/file/both, replacing printf/fprintf
-void logerror(const char *format, ...);              // logs error and exit code
+// ============== I/O Functions ================   
+int _log(const char *format, ...);                // logs to monitor/file/both, replacing printf/fprintf
+void logerror(const char *format, ...);           // logs error and exit code
 FILE *fopenval(const char* fname, struct Fin fin);// open and validate conf/meta file
-void setlogmode(FILE *fconf);                      // sets universal log mode to monitor/file/both from config file
+void setlogmode(FILE *fconf);                     // sets universal log mode to monitor/file/both from config file
 
 // ============= Configuration File Related Functions =============
 void startconf(FILE *fconf);                      // detect 'Start Simulator Configuration File', raise error otherwise
 int verify(char *val, const char *part);          // validate integer values for cycle ms and memory kb in config file
-struct Config getconfig(FILE *fconf);              // get config data from config file in a struct to use later
+struct Config getconfig(FILE *fconf);             // get config data from config file in a struct to use later
                                                   
 // ============= Meta-Data File Related Function s ==============
 char *file2str(FILE *f);                          // reads entire file into string
-char *startmeta(char *buffer);                      // Detect 'Start Program Meta-Data Code:', raise error otherwise
+char *startmeta(char *buffer);                    // Detect 'Start Program Meta-Data Code:', raise error otherwise
 void codeVdesc(const char *token, const char *code, const char *desc);    // Validate meta-data code and descriptor
 int verifycycle(const char *code, const char *desc, const char *cycle);    // Validate meta-data cycle value is positive integer
 void simulator(FILE *fmeta, struct Config conf);  // Main Simulator Function, simulates a meta-data file
