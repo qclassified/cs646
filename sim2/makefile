@@ -1,7 +1,7 @@
-all: clean sim1
+all: clean sim2
 
-sim1: sim1.c 
-	gcc sim1.c -o sim1
+sim2: sim2.c 
+	gcc -pthread -o sim2 sim2.c
 	
 clean:
-	rm -f sim1 *.exe *.stackdump *.lgf
+	rm -f sim2 *.exe *.stackdump *.lgf
