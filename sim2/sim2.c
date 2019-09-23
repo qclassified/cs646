@@ -353,7 +353,7 @@ void setlogmode(FILE *fconf){
     // based on config file to be used by functions _log() and logerror() 
     
     bool validlogmode = 0,              // flag - true if log mode given in config file
-	     validlogfile = 0;              // flag - true if log filepath given
+         validlogfile = 0;              // flag - true if log filepath given
 		 
     char line[256];
 	
