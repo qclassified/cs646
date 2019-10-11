@@ -2,12 +2,12 @@
 0.000000 - OS: preparing process 1
 0.000000 - OS: starting process 1
 0.000000 - Process 1: start processing action
-0.061000 - Process 1: end processing action
-0.061000 - Process 1: allocating memory
-0.093000 - Process 1: memory allocated at 0x00000000
-0.093000 - Process 1: start monitor output
-0.249000 - Process 1: end monitor output
-0.249000 - Process 1: start hard drive input on HDD 0
+0.062000 - Process 1: end processing action
+0.062000 - Process 1: allocating memory
+0.092000 - Process 1: memory allocated at 0x00000000
+0.092000 - Process 1: start monitor output
+0.250000 - Process 1: end monitor output
+0.250000 - Process 1: start hard drive input on HDD 0
 1.452000 - Process 1: end hard drive input
 1.452000 - Process 1: start printer output on PRIN 0
 1.765000 - Process 1: end printer output
@@ -31,23 +31,23 @@
 5.765000 - Process 2: start processing action
 5.796000 - Process 2: end processing action
 5.796000 - Process 2: start printer output on PRIN 2
-5.858000 - Process 2: end printer output
-5.858000 - OS: removing process 2
-5.858000 - OS: preparing process 3
-5.858000 - OS: starting process 3
-5.858000 - Process 3: start memory blocking
+5.859000 - Process 2: end printer output
+5.859000 - OS: removing process 2
+5.859000 - OS: preparing process 3
+5.859000 - OS: starting process 3
+5.859000 - Process 3: start memory blocking
 5.921000 - Process 3: end memory blocking
 5.921000 - Process 3: start keyboard input
 6.952000 - Process 3: end keyboard input
 6.952000 - Process 3: start memory blocking
-7.000000 - Process 3: end memory blocking
-7.000000 - Process 3: start processing action
-7.030000 - Process 3: end processing action
-7.030000 - Process 3: start processing action
-7.061000 - Process 3: end processing action
-7.061000 - Process 3: start hard drive output on HDD 0
+6.999000 - Process 3: end memory blocking
+6.999000 - Process 3: start processing action
+7.031000 - Process 3: end processing action
+7.031000 - Process 3: start processing action
+7.062000 - Process 3: end processing action
+7.062000 - Process 3: start hard drive output on HDD 0
 7.968000 - Process 3: end hard drive output
 7.968000 - Process 3: start processing action
-8.061000 - Process 3: end processing action
-8.061000 - OS: removing process 3
-8.061000 - Simulator Program ending
+8.062000 - Process 3: end processing action
+8.062000 - OS: removing process 3
+8.062000 - Simulator Program ending

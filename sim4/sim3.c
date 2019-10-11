@@ -583,6 +583,40 @@ enum pcb_s {START, READY, RUNNING, WAITING, EXIT};// pcb states
 
 struct PCB {int id, burstms; enum pcb_s state;};    // struct to store simulator pcb state
 
+#define MAX 30
+
+struct PCB readyq[MAX];
+int front = 0;
+int rear = -1;
+int inq = 0;
+
+struct PCB peek() { return readyq[front]; }
+
+bool isEmpty() { return inq == 0; }
+
+bool isFull() { return inq == MAX; }
+
+int size() { return inq; }  
+
+void put(struct PCB data) {
+   if(!isFull()) {
+	
+      if(rear == MAX-1) {rear = -1;}       
+
+      readyq[++rear] = data;
+      inq++;
+   }
+}
+
+struct PCB get() {
+   struct PCB data = readyq[front++];
+	
+   if(front == MAX) {front = 0;}
+	
+   inq--;
+   return data;  
+}
+
 
 // ========== Thead & Time Functions ==========
 
