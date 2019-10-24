@@ -111,7 +111,7 @@ int main(int argc, char* argv[]) {
     FILE * fmeta;                                 // Meta file
     fmeta = fopenval(conf.meta_fname, fin_meta);  // Open Meta file
     
-    readmeta(fmeta, conf);                       // log meta-data to monitor/file/both
+    simulator(fmeta, conf);                       // log meta-data to monitor/file/both
     
     fclose(fmeta);                                // Close Meta file
     
@@ -119,516 +119,6 @@ int main(int argc, char* argv[]) {
     
     return 1;
 }
-
-
-// ================= PCB Ready Queue =========================
-enum pcb_s {START, READY, RUNNING, WAITING, EXIT};// pcb states
-
-struct PCB {int id, burstms; enum pcb_s state;};    // struct to store simulator pcb state
-
-#define MAX 30
-
-struct PCB readyq[MAX];
-int front = 0;
-int rear = -1;
-int inq = 0;
-
-struct PCB peek() { return readyq[front]; }
-
-bool isEmpty() { return inq == 0; }
-
-bool isFull() { return inq == MAX; }
-
-int size() { return inq; }  
-
-void put(struct PCB data) {
-   if(!isFull()) {
-	
-      if(rear == MAX-1) {rear = -1;}       
-
-      readyq[++rear] = data;
-      inq++;
-   }
-}
-
-struct PCB get() {
-   struct PCB data = readyq[front++];
-	
-   if(front == MAX) {front = 0;}
-	
-   inq--;
-   return data;  
-}
-
-
-
-char *startendmeta(char *buffer){
-    // Detect 'Start Program Meta-Data Code:' 
-    // Detect 'End Program Meta-data Code.'
-    // raise Error if absent
-    
-    bool validstart = 0, validend = 0;
-    
-    char *token;
-   
-    while ((token = strsep(&buffer, ":;.")) != NULL) {
-        strtrim(tolowerstr(token));
-        if (streq(token, "start program meta-data code")) {
-            validstart = 1;
-            break;
-        }
-    }
-    
-    token = strsep(&buffer, "end program meta-data code");
-    _log(token);    
-    
-    if (!validstart) logerror("\nError -- Start Program Meta-Data Code: not found\n");
-}
-
-
-void readmeta(FILE *fmeta, struct Config conf){
-    // Read Meta-file into PCB Queue
-    char *buffer = file2str(fmeta);
-    buffer = startendmeta(buffer);
-    
-    char *token, *copy, *code, *desc, *cycle;
-    
-    while ((token = strsep(&buffer, ":;.")) != NULL) {
-            ;        
-    }
-}
-
-
-
-
-// ============= Configuration File Related Functions =============
-
-void startconf(FILE *fconf){
-    // Detect 'Start Simulator Configuration File'; raise Error if absent
-    
-    char line[256];    
-
-    while (fgets(line, sizeof(line), fconf)){
-        strtrim(line);                  // remove leading/trailing/multiple whitespace
-        tolowerstr(line);               // config file is case insensitive
-        
-        if (streq(line, "start simulator configuration file")) 
-            return;                     // start of config file detected
-    }
-    // 'Start Simulator Configuration File' not detected
-    logerror("\nError in config file -- 'Start Simulator Configuration File' not found");
-}
-
-
-int verify(char *val, const char *part, const char *msg){
-    // validate cycle msec or memory kbytes as positive number
-    int m = 1;
-    char *unit=0;
-    
-    if ( !streq(msg, "quantity")) {
-        unit = strsep(&val, "})");      // unit = msec for cycle, kbytes/Mbytes/Gbytes for memory
-        strsep(&val, ":");
-        strtrim(unit); strtrim(val);    // remove whitespace
-    }
-        
-    if (streq(msg, "size")){       
-        if (streq(unit, "kbytes")) ;
-        else if (streq(unit, "mbytes")) m = 1024;
-        else if (streq(unit, "gbytes")) m = 1024*1024;
-        else logerror("\nError -- Invalid unit for '%s' %s: %s", part, msg, unit);
-    } 
-    else if (!streq(msg, "quantity") && !streq(unit, "msec"))
-        logerror("\nError in config file --  Invalid unit for '%s' %s: %s", part, msg, unit);
-    
-    if (isempty(val))                   // Missing cycle ms or memory kbytes
-        logerror("\nError in config file -- Missing %s for '%s'\n", msg, part);
-    
-    if (!isinteger(val))                // non-integer cycle ms or memory kbytes 
-        logerror("\nError in config file -- Invalid (non-integer) %s for '%s' : '%s'\n", msg, part, val);
-    
-    int v = _atoi(val);
-    if (v <= 0)                         // Zero/Negative cycle ms or memory kbytes
-        logerror("\nError in config file -- Invalid (non-positive) %s for '%s' : '%d'\n", msg, part, v);
-    
-    return v*m;                         // *m converts Mbytes/Gbytes to kbytes
-}
-
-
-struct Config getconfig(FILE *fconf){
-    // Gets config data into struct for future use
-    
-    startconf(fconf);                   // Detect 'Start Simulator Configuration File' or raise error
-    
-    bool metafilegiven = 0;             // true if name of meta file given
-    bool endconf = 0;                   // true if config file terminates normally
-    char line[256];                            
-    
-    while (fgets(line, sizeof(line), fconf)){
-        strtrim(line);                  // Remove leading/trailing/multiple whitespace
-        
-        char *copy = &line[0];
-        char *key = strsep(&copy, "{(:"); // key = before :
-        char *val = copy;               // value = after :
-        char *vcpy = strdup(val);
-        
-        strtrim(key); 
-        strtrim(val);                   // Remove leading/trailing/multiple whitespace
-        strtrim(vcpy);
-        tolowerstr(key);
-        tolowerstr(val);
-
-        if (isempty(line)) continue;    // Empty line
-        
-        if(streq(key, "end simulator configuration file")){         // end of conf file
-            endconf = 1; 
-            break;
-        } else if (isempty(val)){ logerror("\nError in config file -- missing value for %s", key);
-        } else if (streq(key, "monitor display time")){ conf.monitor = verify(val, "monitor", "display time");
-        } else if (streq(key, "processor cycle time")){ conf.processor = verify(val, "processor", "cycle time"); 
-        } else if (streq(key, "mouse cycle time")){     conf.mouse = verify(val, "mouse", "cycle time");
-        } else if (streq(key, "hard drive cycle time")){conf.hdd = verify(val, "hard drive", "cycle time");
-        } else if (streq(key, "keyboard cycle time")){  conf.keyboard = verify(val, "keyboard", "cycle time");
-        } else if (streq(key, "memory cycle time")){    conf.memory = verify(val, "memory", "cycle time");
-        } else if (streq(key, "printer cycle time")){   conf.printer = verify(val, "printer", "cycle time");
-        } else if (streq(key, "system memory")){        conf.memkb = verify(val, "system memory", "size");
-        } else if (streq(key, "memory block size")){    conf.memblock = verify(val, "memory block", "size");
-        } else if (streq(key, "version/phase")){        strcpy(conf.version, vcpy);
-        } else if (streq(key, "log file path")){        strcpy(conf.log_fname, log_fname);
-        } else if (streq(key, "file path")){            strcpy(conf.meta_fname, vcpy);
-		} else if (streq(key, "hard drive quantity")){  conf.hdd_q = verify(val, "hard drive", "quantity");
-                                                        hddsem = conf.hdd_q;
-		} else if (streq(key, "printer quantity")){     conf.printer_q = verify(val, "printer", "quantity");
-                                                        printsem = conf.printer_q;
-        } else if (streq(key, "log")){
-            if (log2mon && !log2file)      sprintf(conf.logmode, "%s", "monitor");
-            else if (!log2mon && log2file) sprintf(conf.logmode, "%s", log_fname);
-            else if (log2mon && log2file)  sprintf(conf.logmode, "monitor and %s", log_fname);
-        } else logerror("\nError in config file -- Invalid config line: %s\n", line);
-    }
-
-    if (streq(conf.meta_fname, "None")) // Meta file name not given
-        logerror("\nError in config file -- no meta file specified!\n"); 
-    
-    if (!endconf)                       // Config file abruptly terminated
-        logerror("\nError - config file abruptly terminated -- 'End Simulator Configuration File' not found!\n"); 
-    
-    return conf;
-}
-
-
-
-// ============= Meta-Data File Related Functions ==============
-
-char *file2str(FILE *f){
-    // Read meta file into buffer string
-    char *buffer = 0;            
-    
-    fseek (f, 0, SEEK_END);
-    long length = ftell(f);
-    fseek (f, 0, SEEK_SET);
-    
-    buffer = (char *) malloc(length);
-    fread (buffer, 1, length, f);
-    if (!buffer) logerror("\nError -- reading meta-data file\n");
-    
-    return buffer;
-}
-
-
-char *startmeta(char *buffer){
-    // Detect 'Start Program Meta-Data Code:', raise Error if absent
-    char *token;
-    while ((token = strsep(&buffer, ":;.")) != NULL) {
-        strtrim(tolowerstr(token));
-        if (streq(token, "start program meta-data code")) return buffer;
-    }
-    logerror("\nError -- Start Program Meta-Data Code: not found\n");
-}
-
-
-void codeVdesc(const char *token, const char *code, const char *desc){
-    // Validate meta-data code and descriptor combination
-    char SA[][20] = {"begin", "finish"};        
-    char P[][20]  = {"run"};
-    char I[][20]  = {"hard drive", "keyboard", "mouse"};
-    char O[][20]  = {"hard drive", "printer", "monitor"};
-    char M[][20]  = {"block", "allocate", "cache"};
-    
-    char (*d)[20];
-    if (*code == 'S' || *code == 'A') d = SA;
-    else if (*code == 'P') d = P;
-    else if (*code == 'I') d = I;
-    else if (*code == 'O') d = O;
-    else if (*code == 'M') d = M;
-    else logerror("\nInvalid meta-data code '%s' in meta-data: '%s'\n", code, token);
-    
-    for (int i=0; i<3; i++){ 
-        if (streq(desc, d[i])) return;
-    }
-    logerror("\nError -- Invalid descriptor '%s', for code %s, in meta-data '%s'\n", desc, code, token);
-}
-
-
-int verifycycle(const char *code, const char *desc, const char *cycle){
-    if (isempty(cycle) && !streq(desc, "begin") && !streq(desc, "finish") ) 
-        logerror("\nError in meta file -- missing cycle value for '%s' in: '%s{%s}%s'\n", desc, code, desc, cycle);
-    
-    if (!isinteger(cycle))
-        logerror("\nError in meta file -- invalid (non-integer) cycles '%s' for '%s' in: '%s{%s}%s'\n", cycle, desc, code, desc, cycle);
-    
-    int c = _atoi(cycle);
-    
-    if ( (streq(desc, "begin") || streq(desc, "finish")) && c != 0 )
-        logerror("\nError in meta file -- invalid (non-zero) cycles '%s' for '%s' in: '%s{%s}%s'\n", cycle, desc, code, desc, cycle);
-    else if (c <= 0 && !streq(desc, "begin") && !streq(desc, "finish"))
-        logerror("\nError in meta file -- invalid (non-positive) cycles '%s' for '%s' in: '%s{%s}%s'\n", cycle, desc, code, desc, cycle);
-
-    return c;        
-}
-
-
-int getmstot(int c, const char *desc, struct Config conf){
-    // Calculate total msec for operation
-    
-    int mspc;            // millisesconds per cycle
-    
-    if (streq(desc, "hard drive"))    mspc = conf.hdd;
-    else if (streq(desc, "keyboard")) mspc = conf.keyboard;
-    else if (streq(desc, "mouse"))    mspc = conf.mouse;
-    else if (streq(desc, "monitor"))  mspc = conf.monitor;
-    else if (streq(desc, "run"))      mspc = conf.processor;
-    else if (streq(desc, "allocate")) mspc = conf.memory;
-    else if (streq(desc, "printer"))  mspc = conf.printer;
-    else if (streq(desc, "block"))    mspc = conf.memory;
-    else if (streq(desc, "cache"))    mspc = conf.memory;
-    else mspc = 0;
-    
-    if (mspc == 0 && !streq(desc, "begin") && !streq(desc, "finish"))
-        logerror("\nError -- '%s' cycle time not given in config file\n", desc);
-    
-    return c*mspc;    // Total time for operation
-}
-
-
-
-
-
-// ========== Thead & Time Functions ==========
-
-double now() {return (double)clock()/CLOCKS_PER_SEC;}
-
-
-void wait(int msec){
-   // countdown timer in millisecond, sleep for msec
-    
-    clock_t before = clock(), diff;
-    double ms;
-    do {
-      diff = (double) (clock() - before);
-      ms = diff * 1000 / CLOCKS_PER_SEC;
-    } while ( ms < msec );
-}
-
-
-void *wait_t(void *arg){
-    // entry point for I/O thread
-    
-    struct Io_d io = *(struct Io_d*) arg;
-    int msec = io.msec, proccount = io.proccount;
-    char *code = io.code, *desc = io.desc, *temp;
-    
-    if (streq(code, "I")) temp = strdup("input");
-    else if (streq(code, "O")) temp = strdup("output");
-    
-    char *part;
-    int *lock, *cur, curmax=-1;
-    if (streq(desc, "keyboard")) lock = &keybmut;
-    else if (streq(desc, "mouse")) lock = &mousemut;
-    else if (streq(desc, "monitor")) lock = &monmut;
-    else if (streq(desc, "hard drive")) {
-        lock = &hddsem;
-        cur = &curhdd;
-        curmax = conf.hdd_q - 1;
-        part = strdup("HDD");
-    } else if (streq(desc, "printer")) {
-        lock = &printsem;
-        cur = &curprint;
-        curmax = conf.printer_q - 1;
-        part = strdup("PRIN");
-    }
-    
-    int maxretry = 1000;
-    int retry = 0;
-    
-    while(1){
-        int unlocked = *lock;
-        if (unlocked) {
-            *lock = *lock-1;
-            break;
-        }
-        
-        wait(1);
-        
-        retry ++;
-        if (retry == maxretry)
-            logerror("\nError in simulation -- Cannot lock resource %s after %d retries\n", desc, maxretry);
-    }    
-    
-    if (curmax > -1) {
-        _log("%.6f - Process %d: start %s %s on %s %d\n", now(), proccount, desc, temp, part, *cur);
-        *cur = *cur + 1;
-        if (*cur > curmax) *cur = 0;
-    } else
-        _log("%.6f - Process %d: start %s %s\n", now(), proccount, desc, temp);
-   
-    wait(msec);
-    _log("%.6f - Process %d: end %s %s\n", now(), proccount, desc, temp);
-
-    *lock = *lock+1;
-}
-
-
-void io_thread(struct Io_d *io_ptr){
-    // create/join I/O thread, log and wait
-    
-    pthread_t thread_id;
-    pthread_create(&thread_id, NULL, wait_t, io_ptr); 
-    pthread_join(thread_id, NULL); 
-    return;
-}
-
-
-    
-void simulator(FILE *fmeta, struct Config conf){
-    // Simulates meta-file
-    struct PCB pcbarr[20];
-    
-    char *buffer = file2str(fmeta);    // Read meta file into buffer string    
-    buffer = startmeta(buffer);        // Detect Start Program Meta-Data Code: 
-    char *token, *copy;                // token = meta-data code e.g. A{begin}0
-    char *code, *desc, *cycle;         // meta-data code, descriptor, cycles
-    
-    int proccount = 0;                 // process count - 1,2 ...
-    
-    unsigned int memblocktail = 0;
-    
-    while ((token = strsep(&buffer, ":;.")) != NULL) {
-        strtrim(token);                                   // remove whitespace
-        copy = strdup(token);                             // copy of token
-        tolowerstr(copy);                                 // End program meta-data is case-insensitive
-
-        if (streq(copy, "end program meta-data code"))    // end of meta file
-            return;
-        
-        copy = strdup(token);                             // copy of token
-        code = strsep(&copy, "{(");                       // meta code        
-        desc = strsep(&copy, "})");                       // meta descriptor
-        cycle = strsep(&copy, ")}");                      // meta cycles
-            
-        strtrim(code); strtrim(desc); strtrim(cycle);     // remove whitespace
-        desc = tolowerstr(desc);                          // descriptor is case insensitive
-        
-        if (isempty(token) || *token==' ')  continue;     // Empty meta-data line 
-         
-        if (streq(desc, "start")) desc = strdup("begin"); // start == begin
-        if (streq(desc, "end")) desc = strdup("finish");  // end == finish
-        
-        codeVdesc(token, code, desc);                     // Validate code and descriptor 
-        int c = verifycycle(code, desc, cycle);           // Validate cycle value
-        int mstot = getmstot(c, desc, conf);              // total msec for operation
-
-        
-        //_log("\n%s{%s}%s - %d ms\n", code, desc, cycle, mstot); // Debug
-        
-        if ( *code == 'S'){
-            if ( streq(desc, "begin") ){
-                _log("%.6f - Simulator program starting\n", now());
-            }
-            else if ( streq(desc, "finish")){
-                _log("%.6f - Simulator Program ending\n", now());
-            }
-        } else if ( *code == 'A' ){
-            if ( streq(desc, "begin") ){
-                proccount++;
-                _log("%.6f - OS: preparing process %d\n", now(), proccount);
-                pcbarr[proccount].state = START;
-                _log("%.6f - OS: starting process %d\n", now(), proccount);
-                pcbarr[proccount].state = READY;
-            } else if ( streq(desc, "finish")) {
-                _log("%.6f - OS: removing process %d\n", now(), proccount);
-                pcbarr[proccount].state = EXIT;
-            }
-        } else if ( *code == 'P' ){
-            pcbarr[proccount].state = RUNNING;
-            _log("%.6f - Process %d: start processing action\n", now(), proccount);
-            wait(mstot);
-            _log("%.6f - Process %d: end processing action\n", now(), proccount);
-        } else if ( *code == 'I' || *code == 'O' ){
-            struct Io_d io1 = {mstot, proccount, code, desc};
-            pcbarr[proccount].state = WAITING;
-            io_thread(&io1);
-            pcbarr[proccount].state = RUNNING;
-        } else if (*code == 'M'){
-            if (streq(desc, "block")){
-                _log("%.6f - Process %d: start memory blocking\n", now(), proccount);
-                wait(mstot);
-                _log("%.6f - Process %d: end memory blocking\n", now(), proccount);
-            } else if (streq(desc, "allocate")){
-                if (conf.memkb == 0) logerror("Error -- system memory size not given in config file");
-                if (conf.memblock == 0) logerror("Error -- memory block size not given in config file");
-                
-                _log("%.6f - Process %d: allocating memory\n", now(), proccount);
-                
-                unsigned int loc = conf.memblock*memblocktail++;
-                if (memblocktail >= conf.memkb / conf.memblock)
-                    memblocktail = 0;
-                
-                wait(mstot);
-                _log("%.6f - Process %d: memory allocated at 0x%08X\n", now(), proccount, loc);
-            }
-        }
-        
-        //_log("Program state: %d\n", pcbarr[proccount].state);        // Debug
-    }
-    
-    logerror("\nError -- 'End Program Meta-Data Code:' not found\n");
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 // ============= String Functions =============
@@ -874,6 +364,404 @@ void setlogmode(FILE *fconf){
         exit(0);
     }
     fseek(fconf, 0, SEEK_SET);          // Reset config file pointer for getconfig(FILE *)
+
+}
+
+
+
+// ============= Configuration File Related Functions =============
+
+void startconf(FILE *fconf){
+    // Detect 'Start Simulator Configuration File'; raise Error if absent
+    
+    char line[256];    
+
+    while (fgets(line, sizeof(line), fconf)){
+        strtrim(line);                  // remove leading/trailing/multiple whitespace
+        tolowerstr(line);               // config file is case insensitive
+        
+        if (streq(line, "start simulator configuration file")) 
+            return;                     // start of config file detected
+    }
+    // 'Start Simulator Configuration File' not detected
+    logerror("\nError in config file -- 'Start Simulator Configuration File' not found");
+}
+
+
+int verify(char *val, const char *part, const char *msg){
+    // validate cycle msec or memory kbytes as positive number
+    int m = 1;
+    char *unit=0;
+    
+    if ( !streq(msg, "quantity")) {
+        unit = strsep(&val, "})");      // unit = msec for cycle, kbytes/Mbytes/Gbytes for memory
+        strsep(&val, ":");
+        strtrim(unit); strtrim(val);    // remove whitespace
+    }
+        
+    if (streq(msg, "size")){       
+        if (streq(unit, "kbytes")) ;
+        else if (streq(unit, "mbytes")) m = 1024;
+        else if (streq(unit, "gbytes")) m = 1024*1024;
+        else logerror("\nError -- Invalid unit for '%s' %s: %s", part, msg, unit);
+    } 
+    else if (!streq(msg, "quantity") && !streq(unit, "msec"))
+        logerror("\nError in config file --  Invalid unit for '%s' %s: %s", part, msg, unit);
+    
+    if (isempty(val))                   // Missing cycle ms or memory kbytes
+        logerror("\nError in config file -- Missing %s for '%s'\n", msg, part);
+    
+    if (!isinteger(val))                // non-integer cycle ms or memory kbytes 
+        logerror("\nError in config file -- Invalid (non-integer) %s for '%s' : '%s'\n", msg, part, val);
+    
+    int v = _atoi(val);
+    if (v <= 0)                         // Zero/Negative cycle ms or memory kbytes
+        logerror("\nError in config file -- Invalid (non-positive) %s for '%s' : '%d'\n", msg, part, v);
+    
+    return v*m;                         // *m converts Mbytes/Gbytes to kbytes
+}
+
+
+struct Config getconfig(FILE *fconf){
+    // Gets config data into struct for future use
+    
+    startconf(fconf);                   // Detect 'Start Simulator Configuration File' or raise error
+    
+    bool metafilegiven = 0;             // true if name of meta file given
+    bool endconf = 0;                   // true if config file terminates normally
+    char line[256];                            
+    
+    while (fgets(line, sizeof(line), fconf)){
+        strtrim(line);                  // Remove leading/trailing/multiple whitespace
+        
+        char *copy = &line[0];
+        char *key = strsep(&copy, "{(:"); // key = before :
+        char *val = copy;               // value = after :
+        char *vcpy = strdup(val);
+        
+        strtrim(key); 
+        strtrim(val);                   // Remove leading/trailing/multiple whitespace
+        strtrim(vcpy);
+        tolowerstr(key);
+        tolowerstr(val);
+
+        if (isempty(line)) continue;    // Empty line
+        
+        if(streq(key, "end simulator configuration file")){         // end of conf file
+            endconf = 1; 
+            break;
+        } else if (isempty(val)){ logerror("\nError in config file -- missing value for %s", key);
+        } else if (streq(key, "monitor display time")){ conf.monitor = verify(val, "monitor", "display time");
+        } else if (streq(key, "processor cycle time")){ conf.processor = verify(val, "processor", "cycle time"); 
+        } else if (streq(key, "mouse cycle time")){     conf.mouse = verify(val, "mouse", "cycle time");
+        } else if (streq(key, "hard drive cycle time")){conf.hdd = verify(val, "hard drive", "cycle time");
+        } else if (streq(key, "keyboard cycle time")){  conf.keyboard = verify(val, "keyboard", "cycle time");
+        } else if (streq(key, "memory cycle time")){    conf.memory = verify(val, "memory", "cycle time");
+        } else if (streq(key, "printer cycle time")){   conf.printer = verify(val, "printer", "cycle time");
+        } else if (streq(key, "system memory")){        conf.memkb = verify(val, "system memory", "size");
+        } else if (streq(key, "memory block size")){    conf.memblock = verify(val, "memory block", "size");
+        } else if (streq(key, "version/phase")){        strcpy(conf.version, vcpy);
+        } else if (streq(key, "log file path")){        strcpy(conf.log_fname, log_fname);
+        } else if (streq(key, "file path")){            strcpy(conf.meta_fname, vcpy);
+		} else if (streq(key, "hard drive quantity")){  conf.hdd_q = verify(val, "hard drive", "quantity");
+                                                        hddsem = conf.hdd_q;
+		} else if (streq(key, "printer quantity")){     conf.printer_q = verify(val, "printer", "quantity");
+                                                        printsem = conf.printer_q;
+        } else if (streq(key, "log")){
+            if (log2mon && !log2file)      sprintf(conf.logmode, "%s", "monitor");
+            else if (!log2mon && log2file) sprintf(conf.logmode, "%s", log_fname);
+            else if (log2mon && log2file)  sprintf(conf.logmode, "monitor and %s", log_fname);
+        } else logerror("\nError in config file -- Invalid config line: %s\n", line);
+    }
+
+    if (streq(conf.meta_fname, "None")) // Meta file name not given
+        logerror("\nError in config file -- no meta file specified!\n"); 
+    
+    if (!endconf)                       // Config file abruptly terminated
+        logerror("\nError - config file abruptly terminated -- 'End Simulator Configuration File' not found!\n"); 
+    
+    return conf;
+}
+
+
+
+// ============= Meta-Data File Related Functions ==============
+
+char *file2str(FILE *f){
+    // Read meta file into buffer string
+    char *buffer = 0;            
+    
+    fseek (f, 0, SEEK_END);
+    long length = ftell(f);
+    fseek (f, 0, SEEK_SET);
+    
+    buffer = (char *) malloc(length);
+    fread (buffer, 1, length, f);
+    if (!buffer) logerror("\nError -- reading meta-data file\n");
+    
+    return buffer;
+}
+
+
+char *startmeta(char *buffer){
+    // Detect 'Start Program Meta-Data Code:', raise Error if absent
+    char *token;
+    while ((token = strsep(&buffer, ":;.")) != NULL) {
+        strtrim(tolowerstr(token));
+        if (streq(token, "start program meta-data code")) return buffer;
+    }
+    logerror("\nError -- Start Program Meta-Data Code: not found\n");
+}
+
+
+void codeVdesc(const char *token, const char *code, const char *desc){
+    // Validate meta-data code and descriptor combination
+    char SA[][20] = {"begin", "finish"};        
+    char P[][20]  = {"run"};
+    char I[][20]  = {"hard drive", "keyboard", "mouse"};
+    char O[][20]  = {"hard drive", "printer", "monitor"};
+    char M[][20]  = {"block", "allocate"};
+    
+    char (*d)[20];
+    if (*code == 'S' || *code == 'A') d = SA;
+    else if (*code == 'P') d = P;
+    else if (*code == 'I') d = I;
+    else if (*code == 'O') d = O;
+    else if (*code == 'M') d = M;
+    else logerror("\nInvalid meta-data code '%s' in meta-data: '%s'\n", code, token);
+    
+    for (int i=0; i<3; i++){ 
+        if (streq(desc, d[i])) return;
+    }
+    logerror("\nError -- Invalid descriptor '%s', for code %s, in meta-data '%s'\n", desc, code, token);
+}
+
+
+int verifycycle(const char *code, const char *desc, const char *cycle){
+    if (isempty(cycle) && !streq(desc, "begin") && !streq(desc, "finish") ) 
+        logerror("\nError in meta file -- missing cycle value for '%s' in: '%s{%s}%s'\n", desc, code, desc, cycle);
+    
+    if (!isinteger(cycle))
+        logerror("\nError in meta file -- invalid (non-integer) cycles '%s' for '%s' in: '%s{%s}%s'\n", cycle, desc, code, desc, cycle);
+    
+    int c = _atoi(cycle);
+    
+    if ( (streq(desc, "begin") || streq(desc, "finish")) && c != 0 )
+        logerror("\nError in meta file -- invalid (non-zero) cycles '%s' for '%s' in: '%s{%s}%s'\n", cycle, desc, code, desc, cycle);
+    else if (c <= 0 && !streq(desc, "begin") && !streq(desc, "finish"))
+        logerror("\nError in meta file -- invalid (non-positive) cycles '%s' for '%s' in: '%s{%s}%s'\n", cycle, desc, code, desc, cycle);
+
+    return c;        
+}
+
+
+int getmstot(int c, const char *desc, struct Config conf){
+    // Calculate total msec for operation
+    
+    int mspc;            // millisesconds per cycle
+    
+    if (streq(desc, "hard drive"))    mspc = conf.hdd;
+    else if (streq(desc, "keyboard")) mspc = conf.keyboard;
+    else if (streq(desc, "mouse"))    mspc = conf.mouse;
+    else if (streq(desc, "monitor"))  mspc = conf.monitor;
+    else if (streq(desc, "run"))      mspc = conf.processor;
+    else if (streq(desc, "allocate")) mspc = conf.memory;
+    else if (streq(desc, "printer"))  mspc = conf.printer;
+    else if (streq(desc, "block"))    mspc = conf.memory;
+    else mspc = 0;
+    
+    if (mspc == 0 && !streq(desc, "begin") && !streq(desc, "finish"))
+        logerror("\nError -- '%s' cycle time not given in config file\n", desc);
+    
+    return c*mspc;    // Total time for operation
+}
+
+
+// ================= PCB Ready Queue =========================
+enum pcb_s {START, READY, RUNNING, WAITING, EXIT};// pcb states
+
+struct PCB {int id, burstms; enum pcb_s state;};  // struct to store simulator pcb state
+
+
+// ========== Thead & Time Functions ==========
+
+double now() {return (double)clock()/CLOCKS_PER_SEC;}
+
+
+void wait(int msec){
+   // countdown timer in millisecond, sleep for msec
+    
+    clock_t before = clock(), diff;
+    double ms;
+    do {
+      diff = (double) (clock() - before);
+      ms = diff * 1000 / CLOCKS_PER_SEC;
+    } while ( ms < msec );
+}
+
+
+void *wait_t(void *arg){
+    // entry point for I/O thread
+    
+    struct Io_d io = *(struct Io_d*) arg;
+    int msec = io.msec, proccount = io.proccount;
+    char *code = io.code, *desc = io.desc, *temp;
+    
+    if (streq(code, "I")) temp = strdup("input");
+    else if (streq(code, "O")) temp = strdup("output");
+    
+    char *part;
+    int *lock, *cur, curmax=-1;
+    
+    if (streq(desc, "keyboard")) lock = &keybmut;
+    else if (streq(desc, "mouse")) lock = &mousemut;
+    else if (streq(desc, "monitor")) lock = &monmut;
+    else if (streq(desc, "hard drive")) {
+        lock = &hddsem;
+        cur = &curhdd;
+        curmax = conf.hdd_q - 1;
+        part = strdup("HDD");
+    } else if (streq(desc, "printer")) {
+        lock = &printsem;
+        cur = &curprint;
+        curmax = conf.printer_q - 1;
+        part = strdup("PRIN");
+    }
+    
+    int maxretry = 1000;
+    int retry = 0;
+    
+    while(1){
+        int unlocked = *lock;
+        if (unlocked) {
+            *lock = *lock-1;
+            break;
+        }
+        
+        wait(1);
+        
+        retry ++;
+        if (retry == maxretry)
+            logerror("\nError in simulation -- Cannot lock resource %s after %d retries\n", desc, maxretry);
+    }    
+    
+    if (curmax > -1) {
+        _log("%.6f - Process %d: start %s %s on %s %d\n", now(), proccount, desc, temp, part, *cur);
+        *cur = *cur + 1;
+        if (*cur > curmax) *cur = 0;
+    } else
+        _log("%.6f - Process %d: start %s %s\n", now(), proccount, desc, temp);
+   
+    wait(msec);
+    _log("%.6f - Process %d: end %s %s\n", now(), proccount, desc, temp);
+
+    *lock = *lock+1;
+}
+
+
+void io_thread(struct Io_d *io_ptr){
+    // create/join I/O thread, log and wait
+    
+    pthread_t thread_id;
+    pthread_create(&thread_id, NULL, wait_t, io_ptr); 
+    pthread_join(thread_id, NULL); 
+    return;
+}
+
+    
+void simulator(FILE *fmeta, struct Config conf){
+    // Simulates meta-file
+    struct PCB pcbarr[20];
+    
+    char *buffer = file2str(fmeta);    // Read meta file into buffer string    
+    buffer = startmeta(buffer);        // Detect Start Program Meta-Data Code: 
+    char *token, *copy;                // token = meta-data code e.g. A{begin}0
+    char *code, *desc, *cycle;         // meta-data code, descriptor, cycles
+    
+    int proccount = 0;                 // process count - 1,2 ...
+    
+    unsigned int memblocktail = 0;
+    
+    while ((token = strsep(&buffer, ":;.")) != NULL) {
+        strtrim(token);                                   // remove whitespace
+        copy = strdup(token);                             // copy of token
+        tolowerstr(copy);                                 // End program meta-data is case-insensitive
+
+        if (streq(copy, "end program meta-data code"))    // end of meta file
+            return;
+        
+        copy = strdup(token);                             // copy of token
+        code = strsep(&copy, "{(");                       // meta code        
+        desc = strsep(&copy, "})");                       // meta descriptor
+        cycle = strsep(&copy, ")}");                      // meta cycles
+            
+        strtrim(code); strtrim(desc); strtrim(cycle);     // remove whitespace
+        desc = tolowerstr(desc);                          // descriptor is case insensitive
+        
+        if (isempty(token) || *token==' ')  continue;     // Empty meta-data line 
+         
+        if (streq(desc, "start")) desc = strdup("begin"); // start == begin
+        if (streq(desc, "end")) desc = strdup("finish");  // end == finish
+        
+        codeVdesc(token, code, desc);                     // Validate code and descriptor 
+        int c = verifycycle(code, desc, cycle);           // Validate cycle value
+        int mstot = getmstot(c, desc, conf);              // total msec for operation
+
+        
+        //_log("\n%s{%s}%s - %d ms\n", code, desc, cycle, mstot); // Debug
+        
+        if ( *code == 'S'){
+            if ( streq(desc, "begin") ){
+                _log("%.6f - Simulator program starting\n", now());
+            }
+            else if ( streq(desc, "finish")){
+                _log("%.6f - Simulator Program ending\n", now());
+            }
+        } else if ( *code == 'A' ){
+            if ( streq(desc, "begin") ){
+                proccount++;
+                _log("%.6f - OS: preparing process %d\n", now(), proccount);
+                pcbarr[proccount].state = START;
+                _log("%.6f - OS: starting process %d\n", now(), proccount);
+                pcbarr[proccount].state = READY;
+            } else if ( streq(desc, "finish")) {
+                _log("%.6f - OS: removing process %d\n", now(), proccount);
+                pcbarr[proccount].state = EXIT;
+            }
+        } else if ( *code == 'P' ){
+            pcbarr[proccount].state = RUNNING;
+            _log("%.6f - Process %d: start processing action\n", now(), proccount);
+            wait(mstot);
+            _log("%.6f - Process %d: end processing action\n", now(), proccount);
+        } else if ( *code == 'I' || *code == 'O' ){
+            struct Io_d io1 = {mstot, proccount, code, desc};
+            pcbarr[proccount].state = WAITING;
+            io_thread(&io1);
+            pcbarr[proccount].state = RUNNING;
+        } else if (*code == 'M'){
+            if (streq(desc, "block")){
+                _log("%.6f - Process %d: start memory blocking\n", now(), proccount);
+                wait(mstot);
+                _log("%.6f - Process %d: end memory blocking\n", now(), proccount);
+            } else if (streq(desc, "allocate")){
+                if (conf.memkb == 0) logerror("Error -- system memory size not given in config file");
+                if (conf.memblock == 0) logerror("Error -- memory block size not given in config file");
+                
+                _log("%.6f - Process %d: allocating memory\n", now(), proccount);
+                
+                unsigned int loc = conf.memblock*memblocktail++;
+                if (memblocktail >= conf.memkb / conf.memblock)
+                    memblocktail = 0;
+                
+                wait(mstot);
+                _log("%.6f - Process %d: memory allocated at 0x%08X\n", now(), proccount, loc);
+            }
+        }
+        
+        //_log("Program state: %d\n", pcbarr[proccount].state);        // Debug
+    }
+    
+    logerror("\nError -- 'End Program Meta-Data Code:' not found\n");
 
 }
 
