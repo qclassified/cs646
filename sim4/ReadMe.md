@@ -9,8 +9,13 @@
 
 ## Make and run
 
+#### Make
 ```
 make
+```
+
+### Run
+```
 ./sim4 sim4.conf
 ```
 
@@ -66,4 +71,5 @@ Line 394 - 395:
     STF -- Shortest Time First
     pcb.priority = burst time (in millisecond)
     The one with lowest burst time will be pushed to top of min heap
+Line 399: Push PCB to ready queue/ priority queue/ min heap
 ```
