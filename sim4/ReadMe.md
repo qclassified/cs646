@@ -14,7 +14,7 @@
 make
 ```
 
-### Run
+#### Run
 ```
 ./sim4 sim4.conf
 ```
@@ -75,6 +75,7 @@ Line 394 - 395:
 Line 399: Push PCB to ready queue/ priority queue/ min heap
 Line 252 - 253: Get next PCB from ready queue until it is empty
 Line 356: S{begin} has priority 0, so will always be on top of priority queue
-Line 365: S{finish} has prioirty INT_MAX (maximum possible priority) 
+Line 365: 
+    S{finish} has prioirty INT_MAX (maximum possible priority) 
     so S{finish} will always be at end of priority queue
 ```
