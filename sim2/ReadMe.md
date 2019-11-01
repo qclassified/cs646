@@ -2,6 +2,8 @@
 
 #### CS 646 Principles of Computer Operating Systems
 
+#### Fall 2019
+
 #### University of Nevada, Reno
 
 #### Farhan Sadique
