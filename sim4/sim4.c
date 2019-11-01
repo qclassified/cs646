@@ -386,12 +386,12 @@ void simulate(FILE *fmeta){
                 // Heapsort is not stable by default. So procid is added to priority
                 // to maintain FIFO order for equal priority processes
                 if (streq(conf.sched, "FIFO"))             
-                    pcb.priority = pcb.id;                    // FIFO, priority = process id = order of arrival
-                else if (streq(conf.sched, "PS"))             // PS, priority = ionum = number of I/O operations    
-                    pcb.priority = 1000*pcb.ionum + pcb.id;   // pcb.id (process id) ensures FIFO for equal ionum
-                else if (streq(conf.sched, "SJF"))            // SJF, priority = inum = total number of operations    
-                    pcb.priority = 1000*pcb.inum + pcb.id;    // 1000 ensures- process id does not offset inum
-                else if (streq(conf.sched, "STF"))            // Shortest Time First, priority = burst time (ms)    
+                    pcb.priority = pcb.id;                        // FIFO, priority = process id = order of arrival
+                else if (streq(conf.sched, "PS"))                 // PS, priority = 100 - number of I/O operations    
+                    pcb.priority = 1000*(100-pcb.ionum) + pcb.id; // pcb.id (process id) ensures FIFO for equal ionum
+                else if (streq(conf.sched, "SJF"))                // SJF, priority = inum = total number of operations    
+                    pcb.priority = 1000*pcb.inum + pcb.id;        // 1000 ensures- process id does not offset inum
+                else if (streq(conf.sched, "STF"))                // Shortest Time First, priority = burst time (ms)    
                     pcb.priority = 1000*pcb.burstms + pcb.id; 
                 else logerror("\nError in config -- Unknown scheduler: %s", conf.sched);
                 

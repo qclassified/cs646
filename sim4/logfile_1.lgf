@@ -1,53 +1,69 @@
 0.000000 - Simulator program starting
 0.000000 - OS: preparing process 1
 0.000000 - OS: starting process 1
-0.000000 - Process 1: start processing action
-0.062000 - Process 1: end processing action
-0.062000 - Process 1: allocating memory
-0.093000 - Process 1: memory allocated at 0x00000000
-0.093000 - Process 1: start monitor output
-0.249000 - Process 1: end monitor output
-0.249000 - Process 1: start hard drive input
-1.452000 - Process 1: end hard drive input
-1.452000 - Process 1: start printer output
-2.061000 - Process 1: end printer output
-2.061000 - Process 1: allocating memory
-2.108000 - Process 1: memory allocated at 0x00000080
-2.108000 - End process 1
-2.108000 - OS: preparing process 2
-2.108000 - OS: starting process 2
-2.108000 - Process 2: start printer output
-2.296000 - Process 2: end printer output
-2.296000 - Process 2: allocating memory
-2.328000 - Process 2: memory allocated at 0x00000000
-2.328000 - Process 2: start hard drive input
-3.390000 - Process 2: end hard drive input
-3.390000 - Process 2: start hard drive output
-3.702000 - Process 2: end hard drive output
-3.702000 - Process 2: start hard drive output
-6.108000 - Process 2: end hard drive output
-6.108000 - Process 2: allocating memory
-6.156000 - Process 2: memory allocated at 0x00000080
-6.156000 - Process 2: start processing action
-6.186000 - Process 2: end processing action
-6.186000 - Process 2: start printer output
-6.311000 - Process 2: end printer output
-6.311000 - End process 2
-6.311000 - OS: preparing process 3
-6.311000 - OS: starting process 3
-6.311000 - Process 3: start memory blocking
-6.375000 - Process 3: end memory blocking
-6.375000 - Process 3: start keyboard input
-7.406000 - Process 3: end keyboard input
-7.406000 - Process 3: start memory blocking
-7.452000 - Process 3: end memory blocking
-7.452000 - Process 3: start processing action
-7.484000 - Process 3: end processing action
-7.484000 - Process 3: start processing action
-7.515000 - Process 3: end processing action
-7.515000 - Process 3: start hard drive output
-8.421000 - Process 3: end hard drive output
-8.421000 - Process 3: start processing action
-8.515000 - Process 3: end processing action
-8.515000 - End process 3
-8.515000 - Simulator Program ending
+0.000000 - Process 1: start printer output
+0.031000 - Process 1: end printer output
+0.031000 - Process 1: start printer output
+0.062000 - Process 1: end printer output
+0.062000 - Process 1: start printer output
+0.093000 - Process 1: end printer output
+0.093000 - Process 1: start printer output
+0.125000 - Process 1: end printer output
+0.125000 - End process 1
+0.125000 - OS: preparing process 3
+0.125000 - OS: starting process 3
+0.125000 - Process 3: start printer output
+0.156000 - Process 3: end printer output
+0.156000 - Process 3: start printer output
+0.187000 - Process 3: end printer output
+0.187000 - End process 3
+0.187000 - OS: preparing process 4
+0.187000 - OS: starting process 4
+0.187000 - Process 4: start printer output
+0.218000 - Process 4: end printer output
+0.218000 - Process 4: start printer output
+0.249000 - Process 4: end printer output
+0.249000 - End process 4
+0.249000 - OS: preparing process 5
+0.249000 - OS: starting process 5
+0.249000 - Process 5: start printer output
+0.281000 - Process 5: end printer output
+0.281000 - Process 5: start printer output
+0.311000 - Process 5: end printer output
+0.311000 - End process 5
+0.311000 - OS: preparing process 6
+0.311000 - OS: starting process 6
+0.311000 - Process 6: start printer output
+0.343000 - Process 6: end printer output
+0.343000 - Process 6: start printer output
+0.375000 - Process 6: end printer output
+0.375000 - End process 6
+0.375000 - OS: preparing process 7
+0.375000 - OS: starting process 7
+0.375000 - Process 7: start printer output
+0.405000 - Process 7: end printer output
+0.405000 - Process 7: start printer output
+0.437000 - Process 7: end printer output
+0.437000 - End process 7
+0.437000 - OS: preparing process 2
+0.437000 - OS: starting process 2
+0.437000 - Process 2: start printer output
+0.749000 - Process 2: end printer output
+0.749000 - End process 2
+0.749000 - OS: preparing process 8
+0.749000 - OS: starting process 8
+0.749000 - Process 8: start printer output
+1.061000 - Process 8: end printer output
+1.061000 - End process 8
+1.061000 - OS: preparing process 9
+1.061000 - OS: starting process 9
+1.061000 - Process 9: start printer output
+1.375000 - Process 9: end printer output
+1.375000 - End process 9
+1.375000 - OS: preparing process 10
+1.375000 - OS: starting process 10
+1.375000 - End process 10
+1.375000 - OS: preparing process 11
+1.375000 - OS: starting process 11
+1.375000 - End process 11
+1.375000 - Simulator Program ending

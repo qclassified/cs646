@@ -54,11 +54,11 @@ Line 388 - 389:
     ensuring FIFO order
 Line 390 - 391:
     PS -- Priority Schedule
-    pcb.priority = pcb.ionum, pcb.ionum = total number of I/O operations
-    Since pcb is pushed to min heap, the one with lower ionum will be on top
+    pcb.priority = 100-pcb.ionum, pcb.ionum = total number of I/O operations
+    Since pcb is pushed to min heap, the one with higher ionum will be on top
     However, heapsort is not stable, means mean heap does not maintain FIFO 
     order for processes with equal priority. So, 
-    pcb.priority = 1000*pcb.ionum + pcb.id,  process id is added to priority
+    pcb.priority = 1000*(100-pcb.ionum) + pcb.id,  process id is added to priority
     this ensures process 2 will have lower priority number than process 3
     even if they both have ionum==5. 1000 factor ensures pcb.id does not
     offset contribution of pcb.ionum keeping ionum the dominant factor
@@ -67,10 +67,14 @@ Line 392 - 393:
     pcb.priority = pcb.inum
     pcb.inum = total number of  instructions /tasks for process
     the pcb with lowest inum will be pushed to top of min heap
+    
 Line 394 - 395:
     STF -- Shortest Time First
     pcb.priority = burst time (in millisecond)
     The one with lowest burst time will be pushed to top of min heap
 Line 399: Push PCB to ready queue/ priority queue/ min heap
 Line 252 - 253: Get next PCB from ready queue until it is empty
+Line 356: S{begin} has priority 0, so will always be on top of priority queue
+Line 365: S{finish} has prioirty INT_MAX (maximum possible priority) 
+    so S{finish} will always be at end of priority queue
 ```
