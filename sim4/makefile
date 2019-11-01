@@ -1,7 +1,7 @@
-all: clean sim3
+all: clean sim4
 
-sim3: sim3.c 
-	gcc -pthread -o sim3 sim3.c
+sim4: sim4.c 
+	gcc -pthread -lpthread -lrt -o sim4 sim4.c
 	
 clean:
-	rm -f sim3 *.exe *.stackdump *.lgf
+	rm -f sim4 *.exe *.stackdump *.lgf

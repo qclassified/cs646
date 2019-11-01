@@ -1,0 +1,13 @@
+Start Program Meta-Data Code:
+S{begin}0;  
+
+A{begin}0; A{finish}0;
+
+A{begin}0; O{printer}6; A{finish}0; 
+
+A{begin}0; M{block}6; I{keyboard}17; A{finish}0; 
+
+A{begin}0; M{block}6; I{keyboard}17; I{keyboard}17; A{finish}0; 
+
+S{finish}0.
+End Program Meta-Data Code.
