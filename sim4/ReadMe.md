@@ -41,8 +41,29 @@ So, process with lower priority number (higher priority) will be executed first.
 ```
 Line 517 - 582: Ready queue = priority queue = min heap functions
 Line 70-72: Initialize global priority queue as array
-Line 388: FIFO -- pcb.priority is assigned to process id, 
+Line 388 - 389: 
+    FIFO -- pcb.priority is assigned to process id, 
     process id is incremented in order of arrival. 
     Since PCBs are pushed to the min heap, 
-    the pcb with lowest priority will be on top of heap
+    the pcb with lowest process id will be on top of heap
+    ensuring FIFO order
+Line 390 - 391:
+    PS -- Priority Schedule
+    pcb.priority = pcb.ionum, pcb.ionum = total number of I/O operations
+    Since pcb is pushed to min heap, the one with lower ionum will be on top
+    However, heapsort is not stable, means mean heap does not maintain FIFO 
+    order for processes with equal priority. So, 
+    pcb.priority = 1000*pcb.ionum + pcb.id,  process id is added to priority
+    this ensures process 2 will have lower priority number than process 3
+    even if they both have ionum==5. 1000 factor ensures pcb.id does not
+    offset contribution of pcb.ionum keeping ionum the dominant factor
+Line 392 - 393:
+    SJF -- Shortest Job First
+    pcb.priority = pcb.inum
+    pcb.inum = total number of  instructions /tasks for process
+    the pcb with lowest inum will be pushed to top of min heap
+Line 394 - 395:
+    STF -- Shortest Time First
+    pcb.priority = burst time (in millisecond)
+    The one with lowest burst time will be pushed to top of min heap
 ```
