@@ -2,50 +2,50 @@
 0.000000 - OS: preparing process 1
 0.000000 - OS: starting process 1
 0.000000 - Process 1: start processing action
-0.061000 - Process 1: end processing action
-0.061000 - Process 1: allocating memory
-0.092000 - Process 1: memory allocated at 0x00000000
-0.092000 - Process 1: start monitor output
-0.250000 - Process 1: end monitor output
-0.250000 - Process 1: start hard drive input on HDD 0
+0.062000 - Process 1: end processing action
+0.062000 - Process 1: allocating memory
+0.093000 - Process 1: memory allocated at 0x00000000
+0.093000 - Process 1: start monitor output
+0.249000 - Process 1: end monitor output
+0.249000 - Process 1: start hard drive input
 1.452000 - Process 1: end hard drive input
-1.452000 - Process 1: start printer output on PRIN 0
+1.452000 - Process 1: start printer output
 2.061000 - Process 1: end printer output
 2.061000 - Process 1: allocating memory
 2.108000 - Process 1: memory allocated at 0x00000080
 2.108000 - End process 1
 2.108000 - OS: preparing process 2
 2.108000 - OS: starting process 2
-2.108000 - Process 2: start printer output on PRIN 1
+2.108000 - Process 2: start printer output
 2.296000 - Process 2: end printer output
 2.296000 - Process 2: allocating memory
-2.327000 - Process 2: memory allocated at 0x00000000
-2.327000 - Process 2: start hard drive input on HDD 1
+2.328000 - Process 2: memory allocated at 0x00000000
+2.328000 - Process 2: start hard drive input
 3.390000 - Process 2: end hard drive input
-3.390000 - Process 2: start hard drive output on HDD 0
+3.390000 - Process 2: start hard drive output
 3.702000 - Process 2: end hard drive output
-3.702000 - Process 2: start hard drive output on HDD 1
-6.109000 - Process 2: end hard drive output
-6.109000 - Process 2: allocating memory
-6.155000 - Process 2: memory allocated at 0x00000080
-6.155000 - Process 2: start processing action
-6.187000 - Process 2: end processing action
-6.187000 - Process 2: start printer output on PRIN 2
+3.702000 - Process 2: start hard drive output
+6.108000 - Process 2: end hard drive output
+6.108000 - Process 2: allocating memory
+6.156000 - Process 2: memory allocated at 0x00000080
+6.156000 - Process 2: start processing action
+6.186000 - Process 2: end processing action
+6.186000 - Process 2: start printer output
 6.311000 - Process 2: end printer output
 6.311000 - End process 2
 6.311000 - OS: preparing process 3
 6.311000 - OS: starting process 3
 6.311000 - Process 3: start memory blocking
-6.374000 - Process 3: end memory blocking
-6.374000 - Process 3: start keyboard input
-7.405000 - Process 3: end keyboard input
-7.405000 - Process 3: start memory blocking
-7.453000 - Process 3: end memory blocking
-7.453000 - Process 3: start processing action
+6.375000 - Process 3: end memory blocking
+6.375000 - Process 3: start keyboard input
+7.406000 - Process 3: end keyboard input
+7.406000 - Process 3: start memory blocking
+7.452000 - Process 3: end memory blocking
+7.452000 - Process 3: start processing action
 7.484000 - Process 3: end processing action
 7.484000 - Process 3: start processing action
 7.515000 - Process 3: end processing action
-7.515000 - Process 3: start hard drive output on HDD 0
+7.515000 - Process 3: start hard drive output
 8.421000 - Process 3: end hard drive output
 8.421000 - Process 3: start processing action
 8.515000 - Process 3: end processing action

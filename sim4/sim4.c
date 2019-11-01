@@ -21,7 +21,7 @@
 
              
 /* structure, enum, typdef */
-#define MEMQMAX 9999                                       // Maximum number of memory blocks
+#define MEMQMAX 999                                        // Maximum number of memory blocks
                  
 typedef enum { False, True } bool;                         // Typdef boolean
              
@@ -42,7 +42,7 @@ struct Instruction {                                       // Single meta-data i
 enum STATE {START, READY, RUNNING, WAITING, EXIT};         // pcb states
 struct PCB {                                               // single PCB
     int id, priority, burstms, next, inum, ionum;          // process id, priority, burst time, next instruction, total instructions, number of I/O operations
-    enum STATE state; int imemblk, iswapblk, memblk[99];   // pcb state, num of mem blocks allocated/swapped, address of mem blks allocated
+    enum STATE state; int imemblk, iswapblk, memblk[50];   // pcb state, num of mem blocks allocated/swapped, address of mem blks allocated
     struct Instruction inst[INSTMAX];                      // Instructions for process
 }; 
 
@@ -53,7 +53,7 @@ struct SEM {                                               // Semaphore struct
 struct CONFIG {                                            // Global configuration 
     int hdd, keyb, mem, mon, mouse, proc, print,           // cycle time (ms) of hdd, keyboard, memory...
     memkb, memblk, quant, hddq, printq;                    // memory/block size, quantum num, hdd/printer quantity
-    char ver[99], fname_meta[99], fname_log[99], sched[9]; // version, meta/log filename, cpu scheduling code
+    char ver[20], fname_meta[50], fname_log[50], sched[9]; // version, meta/log filename, cpu scheduling code
 } conf = {0,0,0,0,0,0,0,0,0,0,1,1,"","","",""};            // Default configuration              
 
 
@@ -61,15 +61,13 @@ struct CONFIG {                                            // Global configurati
 
 // ============= I/O Device Semaphore =============
 struct SEM sem;                                            // Blank semaphore struct
-int curhdd=0, curprint=0;                                  // ID of current HDD, printer
-
                                                                                
 // ============= Log mode related global variables =============                                          
 bool Log2mon = True, Log2file = False;                     // Flag - log to monitor, file
 FILE *Flog;                                                // log file 
 
 // ============= PCB Ready Queue Global Variables =============
-#define QMAX 999                                           // Maximum size of pcb ready queue
+#define QMAX 99                                            // Maximum size of pcb ready queue
 struct PCB readyq[QMAX];                                   // PCB ready queue as an array (min heap)
 int inq = 0;                                               // Number of pcb (process) in ready queue
 
@@ -152,18 +150,18 @@ void simulate(FILE *fmeta);                                // Main Simulator Fun
 
 int main(int argc, char* argv[]) {
     //Config file 
-    const char *fname_conf = argv[1];                                          // Config filename
-    FILE *fconf = fopenval(fname_conf, "config", ".conf");                     // Open config file, extension must be .conf            
-    getconfig(fconf);                                                          // Store config in struct conf                         
-    fclose(fconf);                                                             // Close config file
+    const char *fname_conf = argv[1];                      // Config filename
+    FILE *fconf = fopenval(fname_conf, "config", ".conf"); // Open config file, extension must be .conf            
+    getconfig(fconf);                                      // Store config in struct conf                         
+    fclose(fconf);                                         // Close config file
                          
     // Meta file
-    FILE *fmeta;                                                              // Meta file
-    fmeta = fopenval(conf.fname_meta, "meta", ".mdf");                         // Open Meta file, extension must be .mdf                  
-    simulate(fmeta);                                                           // Simulate meta-file instructions                      
-    fclose(fmeta);                                                             // Close Meta file
+    FILE *fmeta;                                           // Meta file
+    fmeta = fopenval(conf.fname_meta, "meta", ".mdf");     // Open Meta file, extension must be .mdf                  
+    simulate(fmeta);                                       // Simulate meta-file instructions                      
+    fclose(fmeta);                                         // Close Meta file
     
-    if (Flog != NULL) fclose(Flog);                                            // Close Log file if open                    
+    if (Flog != NULL) fclose(Flog);                        // Close Log file if open                    
 
     return 1;
 }
@@ -252,11 +250,11 @@ void simulationstart(){
     initsemnmem();
 
     while (!qisempty()){
-        struct PCB pcb = qget();
-        int id = pcb.id;
-        int icount = 0;
+        struct PCB pcb = qget();                                               // Get PCB (of highest priority) from ready queue
+        int id = pcb.id;                                                       // process id (in order of arrival)
+        int icount = 0;                                                        // total instructions/tasks in process
         
-        if (pcb.iswapblk > 0) memswapback(&pcb);
+        if (pcb.iswapblk > 0) memswapback(&pcb);                               // If memory of process was swapped before, reallocate
         
         for (icount = 0; icount < pcb.inum; icount++){
             struct Instruction it = pcb.inst[icount];
@@ -271,19 +269,17 @@ void simulationstart(){
             if ( *code == 'S'){
                 if ( streq(desc, "begin") ){
                     _log("%.6f - Simulator program starting\n", now());
-                }
-                else if ( streq(desc, "finish")){
+                } else if ( streq(desc, "finish")){
                     _log("%.6f - Simulator Program ending\n", now());
                 }
-            }
-            if ( *code == 'A' ){
+            } else if ( *code == 'A' ){
                 if ( streq(desc, "begin") ){
                     _log("%.6f - OS: preparing process %d\n", now(), id);
                     pcb.state = START;
                     _log("%.6f - OS: starting process %d\n", now(), id);
                     pcb.state = READY;
                 } else if ( streq(desc, "finish")) {
-                    memrecapture(&pcb);
+                    memrecapture(&pcb);                                        // Recapture/free memory allocated to exiting process
                     _log("%.6f - End process %d\n", now(), id);
                     pcb.state = EXIT;
                 }
@@ -295,7 +291,7 @@ void simulationstart(){
             } else if ( *code == 'I' || *code == 'O' ){
                 struct IO_D iod = {mstot, id, code, desc};
                 pcb.state = WAITING;
-                io_thread(&iod);
+                io_thread(&iod);                                               // I/O operations are threaded in this function
                 pcb.state = RUNNING;
             } else if (*code == 'M'){
                 if (streq(desc, "block")){
@@ -303,14 +299,17 @@ void simulationstart(){
                     wait(mstot);
                     _log("%.6f - Process %d: end memory blocking\n", now(), id);
                 } else if (streq(desc, "allocate")){
-                    if (conf.memkb == 0) logerror("Error -- system memory size not given in config file");
-                    if (conf.memblk == 0) logerror("Error -- memory block size not given in config file");
+                    if (conf.memkb == 0)                                       // System Memory Size not given in config file
+                        logerror("Error -- system memory size not given in config file");
+                    if (conf.memblk == 0)                                      // System Memory Block Size not given in config file
+                        logerror("Error -- memory block size not given in config file");
                     
                     _log("%.6f - Process %d: allocating memory\n", now(), id);
-                    int loc = memqget();
-                    if (loc == -1) logerror("\nError -- System ran out of Memory");
+                    int loc = memqget();                                       // Get next available memory block from memory heap
+                    if (loc == -1)                                             // System does not have enought memory for this process
+                        logerror("\nError -- System ran out of Memory");       // Even after swapping out all the other processes
                     
-                    pcb.memblk[pcb.imemblk++] = loc;
+                    pcb.memblk[pcb.imemblk++] = loc;                           // Keep track of memory blocks assigned to this process
                     
                     wait(mstot);
                     _log("%.6f - Process %d: memory allocated at 0x%08X\n", now(), id, loc);
@@ -325,13 +324,15 @@ void simulationstart(){
 void simulate(FILE *fmeta){
     // Read Meta-file into PCB ready queue
     char *buffer = file2str(fmeta);                        // Read meta file into buffer string
+    char *buffercopy = buffer;
     struct Instruction inst;                               // Single meta instruction
     bool start=False, end=False;                           // Start/End Program Meta-Data Code
     
     static const struct PCB emptypcb={0,0,0,0,0,0,0,0,0};  // Empty PCB
     struct PCB pcb = emptypcb;                             // pcb of current process
-    int icount, procid=1;                                  // burst time, instruction count, id of process
-
+    int icount=0, procid=1;                                // instruction count, process id = arrival order
+    bool oson=False, inproc=False;                         // Flags: OS turned on, reading a process
+    
     do {
         inst = getnextinst(&buffer);
         
@@ -339,43 +340,72 @@ void simulate(FILE *fmeta){
         else if (inst.status==ENDMETA) {end=True; break;}
         if (!start || inst.status==EMPTYMETA) continue;
         
+        icount++;                                          // Total instruction count from beginning of meta file, used for error logging
         pcb.burstms = pcb.burstms + inst.mstot;            // burst time of process
         pcb.inst[pcb.inum] = inst;                         // store instruction in PCB instruction array
         pcb.inum++;                                        // instruction count of process
         
         if (*inst.code == 'S'){           
-            pcb.id = 0;
+            pcb.id = 0;                                    // OS or System processes have process id 0
             
-            if (streq(inst.desc, "begin")) 
-                pcb.priority = 0;                          // S{begin} has 0 priority; stays at beginning of min heap
-            else if (streq(inst.desc, "finish")) 
-                pcb.priority = INT_MAX;                    // S{begin} has INT_MAX priority; stays at end  of min heap
-            
-            qput(pcb);                                     // Put PCB in priority queue (min heap)
-            pcb = emptypcb;                                // Reinialize current pcb for next process
-        } else if ( *inst.code == 'A' && streq(inst.desc, "finish")) {
-                pcb.id = procid;
+            if (streq(inst.desc, "begin")){
+                if (oson)                                  // Error -- OS is already turned on
+                    logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot turn on OS because it is already on!", icount, inst.code, inst.desc, inst.c);
                 
-                // Heapsort is not stable by default. If proc 1 and proc 2 both have 10
-                // instructions, proc 2 can get executed before proc 1 in SJF
-                // So, priority = inum + process id, which ensures proc 1 will have lower
-                // priority than proc 2 even if they have equal inum. I multiply inum by
-                // 100000 so that contribution of inum is not offset by process id
+                oson = True;                               // OS on flag
+                pcb.priority = 0;                          // S{begin} has 0 priority; stays at beginning of min heap
+            } else if (streq(inst.desc, "finish")) { 
+                if (!oson)                                 // Error -- OS is already shutdown
+                    logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot shutdown OS because it is already off!", icount, inst.code, inst.desc, inst.c);
+                
+                if (inproc)                                // Error -- OS cannot be shutdown while reading a process
+                    logerror("\nError in meta instruction # %d : %s{%s}%d -- OS Shutdown during process # %d!", icount, inst.code, inst.desc, inst.c, procid);
+                
+                oson = False;                              // OS shutdown flag
+                pcb.priority = INT_MAX;                    // S{finish} has INT_MAX priority; stays at end  of min heap
+            }
+            
+            qput(pcb);                                     // Put PCB in ready queue (min heap)
+            pcb = emptypcb;                                // Reinialize current pcb for next process
+        } else if ( *inst.code == 'A') {
+            if (streq(inst.desc, "begin")){
+                if (!oson)                                 // Error -- process cannot be started while OS is shutdown
+                    logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot start process # %d because OS is shutdown!", icount, inst.code, inst.desc, inst.c, procid);
+                
+                if (inproc)                                // Error -- new process cannot be started before finishing reading previous process
+                    logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot start reading new process before previous process terminates!", icount, inst.code, inst.desc, inst.c);
+                
+                inproc = True;
+            } else if (streq(inst.desc, "finish")){
+                if (!inproc)                               // Error -- cannot terminate because no process is started
+                    logerror("\nError in meta instruction # %d : %s{%s}%d -- There is no started process to terminate!", icount, inst.code, inst.desc, inst.c);
+                
+                inproc = False;                            // Flag: reading a process
+                pcb.id = procid;                           // Process id == order of arrival in meta file
+                
+                // Heapsort is not stable by default. So procid is added to priority
+                // to maintain FIFO order for equal priority processes
                 if (streq(conf.sched, "FIFO"))             
-                    pcb.priority = pcb.id;                      // FIFO, priority = process id = order of arrival
-                else if (streq(conf.sched, "PS"))               // PS, priority = ionum = number of I/O operations    
-                    pcb.priority = 100000*pcb.ionum + pcb.id;   // pcb.id (process id) ensures FIFO for equal ionum
-                else if (streq(conf.sched, "SJF"))              // SJF, priority = inum = total number of operations    
-                    pcb.priority = 100000*pcb.inum + pcb.id;    // 100000 ensures process id does not offset inum
-                else if (streq(conf.sched, "STF"))              // Shortest Time First, priority = burst time (ms)    
-                    pcb.priority = 100000*pcb.burstms + pcb.id; //
+                    pcb.priority = pcb.id;                    // FIFO, priority = process id = order of arrival
+                else if (streq(conf.sched, "PS"))             // PS, priority = ionum = number of I/O operations    
+                    pcb.priority = 1000*pcb.ionum + pcb.id;   // pcb.id (process id) ensures FIFO for equal ionum
+                else if (streq(conf.sched, "SJF"))            // SJF, priority = inum = total number of operations    
+                    pcb.priority = 1000*pcb.inum + pcb.id;    // 1000 ensures- process id does not offset inum
+                else if (streq(conf.sched, "STF"))            // Shortest Time First, priority = burst time (ms)    
+                    pcb.priority = 1000*pcb.burstms + pcb.id; 
                 else logerror("\nError in config -- Unknown scheduler: %s", conf.sched);
                 
                 procid++;                                  // process id count
-                qput(pcb);                                 // Put PCB in priority queue (min heap)
-                pcb = emptypcb;                            // Reinialize current pcb for next process
-        } else if (*inst.code == 'I' || *inst.code == 'O') {
-            pcb.ionum++;                                   // I/O instruction count (used for Priority Schedule)
+                qput(pcb);                                 // Put PCB in PCB ready queue (min heap)
+                pcb = emptypcb;                            // Reinialize PCB for next process
+            }
+        } else {
+            if (!inproc)                                   // Error -- Instruction must be inside A{begin} - A{finish} block
+                logerror("\nError in meta instruction # %d : %s{%s}%d -- Instruction is not inside a process block!", icount, inst.code, inst.desc, inst.c);
+            
+            if (*inst.code=='I' || *inst.code=='O') {
+                pcb.ionum++;                               // I/O instruction count (used for Priority Schedule)
+            }
         }       
         
     } while(inst.status != NULLMETA);                      // NULLMETA = End of file
@@ -383,7 +413,7 @@ void simulate(FILE *fmeta){
     if (!start) logerror("Error in meta file -- 'Start Program Meta-Data Code:' not present");
     if (!end) logerror("Error in meta file -- 'End Program Meta-Data Code.' not present");
     
-    simulationstart();
+    simulationstart();                                     // Helper function to execute each PCB from ready queue
             
 }
 
@@ -455,32 +485,33 @@ void memqprint(){
 }
 
 
-void memrecapture(struct PCB *pcb_ptr){
-    for (int i = 0; i < pcb_ptr->imemblk; i++) {
-        memqput(pcb_ptr->memblk[i]);
-    }
-    pcb_ptr->imemblk = 0;
-}
+void memrecapture(struct PCB *pcb_ptr){             // Recapture/free memory allocated to PCB
+    for (int i = 0; i < pcb_ptr->imemblk; i++) {    
+        memqput(pcb_ptr->memblk[i]);                
+    }                                               
+    pcb_ptr->imemblk = 0;                           
+}                                                   
+                                                    
+                                                    
+int memqswapnget(){                                 // If memory is full, swap memory of idle process into HDD
+    for (int i = inq - 1; i > -1; i--){             
+        if (readyq[i].imemblk > 0){                 
+            readyq[i].iswapblk = readyq[i].imemblk; 
+            memrecapture(&readyq[i]);               
+            return memqget();                       
+        }                                           
+    }                                               
+    return -1;                                      // Memory full, error
+}                                                   
 
 
-int memqswapnget(){     // If memory is full, swap memory of idle process into HDD
-    for (int i = inq - 1; i > -1; i--){
-        if (readyq[i].imemblk > 0){
-            readyq[i].iswapblk = readyq[i].imemblk;
-            memrecapture(&readyq[i]);
-            return memqget();
-        }
-    }
-    return -1;          // Memory full, error
-}
-
-
-void memswapback(struct PCB *pcb_ptr){
+void memswapback(struct PCB *pcb_ptr){              // Reallocate memory to pcb because it was swapped to HDD earlier
     pcb_ptr->imemblk = pcb_ptr->iswapblk;
     for (int i = 0; i < pcb_ptr->imemblk; i++){
         pcb_ptr->memblk[i] = memqget();
     }
 }
+
 
 
 // ================= Min HEAP for PCB Ready Queue ================
@@ -574,38 +605,21 @@ void *wait_t(void *arg){
     int msec = io.msec, procid = io.procid;
     char *code = io.code, *desc = io.desc, *operation;
     
-    if (streq(code, "I")) operation = strdup("input");
-    else if (streq(code, "O")) operation = strdup("output");
+    if (streq(io.code, "I")) operation = strdup("input");
+    else if (streq(io.code, "O")) operation = strdup("output");
     
-    char *part;
-    int *cur, curmax=-1;
     sem_t *lock;
     if (streq(desc, "keyboard")) lock = &sem.keyb;
-    else if (streq(desc, "mouse")) lock = &sem.mouse;
-    else if (streq(desc, "monitor")) lock = &sem.mon;
-    else if (streq(desc, "hard drive")) {
-        lock = &sem.hdd;
-        cur = &curhdd;
-        curmax = conf.hddq - 1;
-        part = strdup("HDD");
-    } else if (streq(desc, "printer")) {
-        lock = &sem.print;
-        cur = &curprint;
-        curmax = conf.printq - 1;
-        part = strdup("PRIN");
-    }
+    else if (streq(io.desc, "mouse")) lock = &sem.mouse;
+    else if (streq(io.desc, "monitor")) lock = &sem.mon;
+    else if (streq(io.desc, "hard drive")) lock = &sem.hdd;
+    else if (streq(io.desc, "printer")) lock = &sem.print;
     
     sem_wait(lock);
     
-    if (curmax > -1) {
-        _log("%.6f - Process %d: start %s %s on %s %d\n", now(), procid, desc, operation, part, *cur);
-        *cur = *cur + 1;
-        if (*cur > curmax) *cur = 0;
-    } else
-        _log("%.6f - Process %d: start %s %s\n", now(), procid, desc, operation);
-   
-    wait(msec);
-    _log("%.6f - Process %d: end %s %s\n", now(), procid, desc, operation);
+    _log("%.6f - Process %d: start %s %s\n", now(), io.procid, io.desc, operation);
+    wait(io.msec);
+    _log("%.6f - Process %d: end %s %s\n", now(), io.procid, io.desc, operation);
 
     sem_post(lock);
 }
@@ -626,13 +640,15 @@ pthread_t io_thread(struct IO_D *io_ptr){
 
 char *file2str(FILE *f){
     // Read meta file into buffer string
+    
     fseek(f, 0, SEEK_END);
     long length = ftell(f);
     fseek(f, 0, SEEK_SET);
     char *buffer = (char *) malloc(length + 1);
     buffer[length] = '\0';
     fread(buffer, 1, length, f);
-    fclose(f);
+    if (!buffer) logerror("\nError -- reading meta-data file\n");
+
     return buffer;
 }
 
@@ -811,12 +827,13 @@ int _log(const char *format, ...){
     // log to monitor/file/both based on config
     // wrapper on fprintf, replaces printf & fprintf
     
-    int r=-1;
-    va_list arg;
-    va_start(arg, format);
-    if (Log2mon) { r = vfprintf(stdout, format, arg); }     // stdout = monitor
-    if (Log2file && Flog) { r = vfprintf(Flog, format, arg); }      // global Flog
-    va_end(arg);
+    int r;
+    va_list arg1, arg2;
+    va_start(arg1, format);
+	va_copy(arg2, arg1);
+    if (Log2mon) { r = vfprintf(stdout, format, arg1); }     // stdout = monitor
+    if (Log2file && Flog) { r = vfprintf(Flog, format, arg2); }      // global Flog
+    va_end(arg1);
     return r;
 }
 
