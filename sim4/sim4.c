@@ -22,7 +22,6 @@
              
 /* structure, enum, typdef */
 
-                 
 typedef enum { False, True } bool;                         // Typdef boolean
              
 struct Fin {char type[10], ext[10];};                      // Used to validate config/meta file
@@ -38,12 +37,13 @@ struct Instruction {                                       // Single meta-data i
    enum INSTSTATUS status; int c, mstot; char code[5], desc[20]; 
 };
 
-#define INSTMAX 99
+#define MAXPCBINUM 99
 enum STATE {START, READY, RUNNING, WAITING, EXIT};         // pcb states
 struct PCB {                                               // single PCB
     int id, priority, burstms, next, inum, ionum;          // process id, priority, burst time, next instruction, total instructions, number of I/O operations
-    enum STATE state; int imemblk, iswapblk, memblk[50];   // pcb state, num of mem blocks allocated/swapped, address of mem blks allocated
-    struct Instruction inst[INSTMAX];                      // Instructions for process
+    enum STATE state;                                      // PCB State
+    int imemblk, iswapblk, memblk[MAXPCBINUM];             // num of mem blocks allocated/swapped, address of mem blks allocated
+    struct Instruction inst[MAXPCBINUM];                   // Instructions for process
 }; 
 
 struct SEM {                                               // Semaphore struct
@@ -72,7 +72,7 @@ struct PCB readyq[QMAX];                                   // PCB ready queue as
 int inq = 0;                                               // Number of pcb (process) in ready queue
 
 // ============= Memory Heap Global Variables =============
-#define MEMQMAX 999                                        // Maximum number of memory blocks
+#define MEMQMAX 99999                                      // Maximum number of memory blocks
 int memq[MEMQMAX];
 int memqfront = 0, memqrear = -1, inmemq = 0;
 
@@ -82,10 +82,10 @@ int memqfront = 0, memqrear = -1, inmemq = 0;
 // ========= Memory Heap & Swap Functions =========
 
 bool memqisempty();                                        // True if memory full (memory heap empty)
-bool memqisfull();                                         // True if memory size greater than system memory address space
-bool memqput(int memblk);                                  // put memory block into heap
-int memqpeek();                                            // peek element in memory block
-int memqget();                                             // get memory block from heap
+bool memqisfull();                                         // Memory address space = MEMQMAX blocks, error if more memory blocks
+bool memqput(int memblk);                                  // put memory block at end of memory queue
+int memqpeek();                                            // peek front of memory queue
+int memqget();                                             // get memory block from front of memory queu
 void memrecapture(struct PCB *pcb_ptr);                    // recapture memory allocated to process 
 int memqswapnget();                                        // swap memory allocated to idle process into HDD and get it
 void memswapback(struct PCB *pcb_ptr);                     // swap back memory of ready process from HDD
@@ -142,9 +142,6 @@ void initsemnmem();                                        // Initialize memory 
 void simulationstart();                                    // Helper function to simulate, starts executing each process
 void simulate(FILE *fmeta);                                // Main Simulator Function, simulates a meta-data file
 
-
-
-
 int main(int argc, char* argv[]) {
     //Config file 
     const char *fname_conf = argv[1];                      // Config filename
@@ -162,7 +159,6 @@ int main(int argc, char* argv[]) {
 
     return 1;
 }
-
 
 
 // ====================== Simulator =====================
@@ -220,9 +216,14 @@ struct Instruction getnextinst(char **buffer_ptr){
 }
 
 
+
+
+
+
 void initsemnmem(){
     for (int i=0; i < conf.memkb; i += conf.memblk){
-        memqput(i);
+        bool success = memqput(i);
+        if (!success) logerror("\nWarning -- Number of memory blocks: %d, greater than system memory address space: %d!\n", conf.memkb/conf.memblk, MEMQMAX);
     }
     
     sem_init(&sem.keyb, 0, 1);                                                          
@@ -341,6 +342,7 @@ void simulate(FILE *fmeta){
         pcb.burstms = pcb.burstms + inst.mstot;            // burst time of process
         pcb.inst[pcb.inum] = inst;                         // store instruction in PCB instruction array
         pcb.inum++;                                        // instruction count of process
+        if (pcb.inum == MAXPCBINUM) logerror("\nError in process # %d -- Exceeds maximum number of instructions: %d", procid, MAXPCBINUM);
         
         if (*inst.code == 'S'){           
             pcb.id = 0;                                    // OS or System processes have process id 0
@@ -368,7 +370,6 @@ void simulate(FILE *fmeta){
             if (streq(inst.desc, "begin")){
                 if (!oson)                                 // Error -- process cannot be started while OS is shutdown
                     logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot start process # %d because OS is shutdown!", icount, inst.code, inst.desc, inst.c, procid);
-                
                 if (inproc)                                // Error -- new process cannot be started before finishing reading previous process
                     logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot start reading new process before previous process terminates!", icount, inst.code, inst.desc, inst.c);
                 
@@ -376,10 +377,9 @@ void simulate(FILE *fmeta){
             } else if (streq(inst.desc, "finish")){
                 if (!inproc)                               // Error -- cannot terminate because no process is started
                     logerror("\nError in meta instruction # %d : %s{%s}%d -- There is no started process to terminate!", icount, inst.code, inst.desc, inst.c);
-                
                 inproc = False;                            // Flag: reading a process
                 pcb.id = procid;                           // Process id == order of arrival in meta file
-                
+     
                 // Heapsort is not stable by default. So procid is added to priority
                 // to maintain FIFO order for equal priority processes
                 if (streq(conf.sched, "FIFO"))             
@@ -393,6 +393,7 @@ void simulate(FILE *fmeta){
                 else logerror("\nError in config -- Unknown scheduler: %s", conf.sched);
                 
                 procid++;                                  // process id count
+                if (procid == QMAX) logerror("\nMeta file exceeds maximum number of process: %d", QMAX);
                 qput(pcb);                                 // Put PCB in PCB ready queue (min heap)
                 pcb = emptypcb;                            // Reinialize PCB for next process
             }
@@ -410,8 +411,7 @@ void simulate(FILE *fmeta){
     if (!start) logerror("Error in meta file -- 'Start Program Meta-Data Code:' not present");
     if (!end) logerror("Error in meta file -- 'End Program Meta-Data Code.' not present");
     
-    simulationstart();                                     // Helper function to execute each PCB from ready queue
-            
+    simulationstart();                                     // Helper function to execute each PCB from ready queue       
 }
 
 
@@ -437,7 +437,7 @@ bool memqput(int memblk){
 }
 
 
-int memqget(){
+int memqget(){                          
     if (memqisempty()) return memqswapnget();
     
     int memblk = memq[memqfront++];

@@ -30,12 +30,12 @@ memqget() gets next memmory block head, memqput(int) puts freed up memory at end
 Line 419 - Line 477: FIFO queue of memory blocks and memory swapping Functions
 Line 75-77: Global array for memory queue
 Line 224: For loop puts head of each memory block into memory queue
-Line 305: memory allocate task gets next memory block in front of memory queue
-Line 309: allocate memory block to PCB 
+Line 306: memory allocate task gets next memory block in front of memory queue
+Line 310: allocate memory block to PCB 
 Line 440-447: if memory queue is not empty, return memory block on top of memory queue
 Line 458-465: if memory queue is empty, swap/free up memory allocated to idle processes in ready queue
 Line 466: error -- not enough memory even after swapping all memory allocated to all idle processes
-Line 279: free up/ recapture memory allocated to exiting process
+Line 280: free up/ recapture memory allocated to exiting process
 Line 450: function used to recapture memory from PCB
 ```
 
@@ -73,10 +73,10 @@ Line 391 - 392:
     STF -- Shortest Time First
     pcb.priority = burst time (in millisecond)
     The one with lowest burst time will be pushed to top of min heap
-Line 396: Push PCB to ready queue/ priority queue/ min heap
-Line 249 - 253: Get next PCB from ready queue until it is empty
-Line 353: S{begin} has priority 0, so will always be on top of priority queue
-Line 362: 
+Line 397: Push PCB to ready queue/ priority queue/ min heap
+Line 250: Get next PCB from ready queue until it is empty
+Line 355: S{begin} has priority 0, so will always be on top of priority queue
+Line 364: 
     S{finish} has prioirty INT_MAX (maximum possible priority) 
     so S{finish} will always be at end of priority queue
 ```
