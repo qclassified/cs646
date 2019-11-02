@@ -21,7 +21,7 @@
 
              
 /* structure, enum, typdef */
-
+#define MEMQMAX 999                                        // Maximum number of memory blocks
                  
 typedef enum { False, True } bool;                         // Typdef boolean
              
@@ -72,9 +72,8 @@ struct PCB readyq[QMAX];                                   // PCB ready queue as
 int inq = 0;                                               // Number of pcb (process) in ready queue
 
 // ============= Memory Heap Global Variables =============
-#define MEMQMAX 999                                        // Maximum number of memory blocks
 int memq[MEMQMAX];
-int memqfront = 0, memqrear = -1, inmemq = 0;
+int inmemq = 0;
 
 
 /* Function Declarations */
@@ -83,9 +82,13 @@ int memqfront = 0, memqrear = -1, inmemq = 0;
 
 bool memqisempty();                                        // True if memory full (memory heap empty)
 bool memqisfull();                                         // True if memory size greater than system memory address space
-bool memqput(int memblk);                                  // put memory block into heap
+void memqswap(int i, int j);                               // Exchange two memory blocks in memory heap
+void memheapifyup();                                       // heapify memory heap starting from leaf
+void memheapifydown();                                     // heapify memory heap starting from root
+void memqput(int memblk);                                  // put memory block into heap
 int memqpeek();                                            // peek element in memory block
 int memqget();                                             // get memory block from heap
+void memqprint();                                          // print memory heap
 void memrecapture(struct PCB *pcb_ptr);                    // recapture memory allocated to process 
 int memqswapnget();                                        // swap memory allocated to idle process into HDD and get it
 void memswapback(struct PCB *pcb_ptr);                     // swap back memory of ready process from HDD
@@ -416,34 +419,70 @@ void simulate(FILE *fmeta){
 
 
 
-// ================ Memory FIFI Queue & Swapping ================
+// ================ Memory Heap & Swapping ================
 
-int memqpeek() {return memq[memqfront];}
-
-
-bool memqisempty() { return inmemq==0;}
+/*
+bool memqisempty() { return inmemq == 0; }
 
 
-bool memqisfull() { return inmemq==MEMQMAX; }
+bool memqisfull() { return inmemq == MEMQMAX; }
 
 
-bool memqput(int memblk){
-    if (!memqisfull()){
-        if (memqrear == MEMQMAX-1) memqrear = -1;
-        memq[++memqrear] = memblk;
-        inmemq++;
-        return True;
-    } else return False;
+void memqswap(int i, int j){
+    int t = memq[i];
+    memq[i] = memq[j];
+    memq[j] = t;    
 }
+
+
+void memheapifyup(){ 
+    int child = inmemq-1, parent = child/2;
+    while(parent >= 0 && memq[parent] > memq[child]) {
+        memqswap(parent, child);
+        child = parent;
+        parent = child/2;
+    } 
+}
+
+
+void memheapifydown(){ 
+    int i = 0;
+    while (i < inmemq){
+        int min = i, left = 2*i+1, right = 2*i+2;
+        if (left < inmemq && memq[min] > memq[left]) min = left;
+        if (right < inmemq && memq[min] > memq[right]) min = right;
+        if (min != i) memqswap(min, i);
+        else break;
+        i = min;
+    }
+}
+
+
+void memqput(int memblk){
+    memq[inmemq++] = memblk;
+    memheapifyup();
+}
+
+
+int memqpeek(){ return memq[0]; }
 
 
 int memqget(){
     if (memqisempty()) return memqswapnget();
     
-    int memblk = memq[memqfront++];
-    if (memqfront == MEMQMAX) memqfront=0;
+    int memblk = memq[0];
     inmemq--;
+    memqswap(0, inmemq);
+    memheapifydown();
     return memblk;
+}
+
+
+void memqprint(){
+    for (int i=0; i < inmemq; i++) {
+        _log("%d -- ", memq[i]);
+    }
+    _log("\n");
 }
 
 
@@ -453,8 +492,8 @@ void memrecapture(struct PCB *pcb_ptr){             // Recapture/free memory all
     }                                               
     pcb_ptr->imemblk = 0;                           
 }                                                   
- 
- 
+                                                    
+                                                    
 int memqswapnget(){                                 // If memory is full, swap memory of idle process into HDD
     for (int i = inq - 1; i > -1; i--){             
         if (readyq[i].imemblk > 0){                 
@@ -474,7 +513,7 @@ void memswapback(struct PCB *pcb_ptr){              // Reallocate memory to pcb 
     }
 }
 
-
+*/
 
 // ================= Min HEAP for PCB Ready Queue ================
 

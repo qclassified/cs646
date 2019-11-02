@@ -4,6 +4,7 @@ S{begin}0;
 A{begin}0; 
 M{allocate}1; M{allocate}1; M{allocate}1; M{allocate}1;M{allocate}1;
 M{allocate}1; M{allocate}1; M{allocate}1; M{allocate}1;M{allocate}1;
+M{allocate}1; M{allocate}1; M{allocate}1; M{allocate}1;M{allocate}1;
 M{allocate}1; M{allocate}1; M{allocate}1;
 I{keyboard}1;
 I{keyboard}1;

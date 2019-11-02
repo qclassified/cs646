@@ -23,38 +23,38 @@ make
 
 #### Memory Allocation
 
-Implemented using min heap of memory block heads. 
-Process gets next available memory block from beginning.
+Implemented using FIFO queue (int array) of memory block heads. 
+memqget() gets next memmory block head, memqput(int) puts freed up memory at end of queue.
 
 ```
-Line 422 - Line 516: Memory heap (min heap) and Memory swapping functions
-Line 75-76: Global array for memory heap
-Line 227: For loop puts head of each memory block into memory heap
-Line 308: memory allocate task gets next memory block on top of memory heap
-Line 312: allocate memory block to PCB 
-Line 469: if memory heap is not empty, return memory block on top of memory heap
-Line 496: if memory heap is empty, swap/free up memory allocated to idle processes in ready queue
-Line 504: error -- not enough memory even after swapping all memory allocated to all idle processes
-Line 282: free up/ recapture memory allocated to exiting process
-Line 488: function used to recapture memory from PCB
+Line 419 - Line 477: FIFO queue of memory blocks and memory swapping Functions
+Line 75-77: Global array for memory queue
+Line 224: For loop puts head of each memory block into memory queue
+Line 305: memory allocate task gets next memory block in front of memory queue
+Line 309: allocate memory block to PCB 
+Line 440-447: if memory queue is not empty, return memory block on top of memory queue
+Line 458-465: if memory queue is empty, swap/free up memory allocated to idle processes in ready queue
+Line 466: error -- not enough memory even after swapping all memory allocated to all idle processes
+Line 279: free up/ recapture memory allocated to exiting process
+Line 450: function used to recapture memory from PCB
 ```
 
 #### Scheduler
 
-Implemented using min heap. 
+Implemented using min heap / priority queue. 
 Global ready queue is a min heap where key is priority.
 So, process with lower priority number (higher priority) will be executed first.
 
 ```
-Line 517 - 582: Ready queue = priority queue = min heap functions
+Line 479 - 545: Ready queue = priority queue = min heap functions
 Line 70-72: Initialize global priority queue as array
-Line 388 - 389: 
+Line 385 - 386: 
     FIFO -- pcb.priority is assigned to process id, 
     process id is incremented in order of arrival. 
     Since PCBs are pushed to the min heap, 
     the pcb with lowest process id will be on top of heap
     ensuring FIFO order
-Line 390 - 391:
+Line 387 - 388:
     PS -- Priority Schedule
     pcb.priority = 100-pcb.ionum, pcb.ionum = total number of I/O operations
     Since pcb is pushed to min heap, the one with higher ionum will be on top
@@ -64,20 +64,19 @@ Line 390 - 391:
     this ensures process 2 will have lower priority number than process 3
     even if they both have ionum==5. 1000 factor ensures pcb.id does not
     offset contribution of pcb.ionum keeping ionum the dominant factor
-Line 392 - 393:
+Line 389 - 390:
     SJF -- Shortest Job First
     pcb.priority = pcb.inum
     pcb.inum = total number of  instructions /tasks for process
     the pcb with lowest inum will be pushed to top of min heap
-    
-Line 394 - 395:
+Line 391 - 392:
     STF -- Shortest Time First
     pcb.priority = burst time (in millisecond)
     The one with lowest burst time will be pushed to top of min heap
-Line 399: Push PCB to ready queue/ priority queue/ min heap
-Line 252 - 253: Get next PCB from ready queue until it is empty
-Line 356: S{begin} has priority 0, so will always be on top of priority queue
-Line 365: 
+Line 396: Push PCB to ready queue/ priority queue/ min heap
+Line 249 - 253: Get next PCB from ready queue until it is empty
+Line 353: S{begin} has priority 0, so will always be on top of priority queue
+Line 362: 
     S{finish} has prioirty INT_MAX (maximum possible priority) 
     so S{finish} will always be at end of priority queue
 ```
