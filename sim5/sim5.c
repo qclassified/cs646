@@ -679,7 +679,7 @@ void *wait_io(void *pcbptr){
     sem_post(lock);
     
     pcb.icount = pcb.icount + 1;
-    pcb.state = RUNNING;
+    pcb.state = READY;
     
     sem_wait(&mut_rq);
     qput(pcb);

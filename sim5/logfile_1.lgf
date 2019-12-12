@@ -1,116 +1,112 @@
 0.000000 - Simulator program starting
-0.046000 - OS: preparing process 1
-0.046000 - OS: starting process 1
-0.046000 - Process 1: start processing action
-0.140000 - Process 1: interrupt processing action
-0.140000 - OS: preparing process 2
-0.140000 - OS: starting process 2
-0.140000 - OS: preparing process 3
-0.140000 - OS: starting process 3
-0.140000 - Process 3: start processing action
-0.140000 - Process 2: start hard drive output on HDD 0
-0.203000 - Process 3: end processing action
-0.203000 - OS: preparing process 4
-0.203000 - OS: starting process 4
-0.203000 - Process 4: start processing action
-0.203000 - Process 3: start keyboard input
-0.281000 - Process 4: interrupt processing action
-0.281000 - OS: preparing process 5
-0.281000 - OS: starting process 5
-0.281000 - OS: preparing process 6
-0.281000 - OS: starting process 6
-0.281000 - Process 6: start processing action
-0.281000 - Process 5: start hard drive output on HDD 1
-0.374000 - Process 6: end processing action
-0.374000 - OS: preparing process 7
-0.374000 - OS: starting process 7
-0.374000 - Process 7: start processing action
-0.468000 - Process 7: interrupt processing action
-0.468000 - OS: preparing process 7
-0.468000 - OS: starting process 7
-0.468000 - Process 7: start processing action
-0.562000 - Process 7: interrupt processing action
-0.562000 - OS: preparing process 8
-0.562000 - OS: starting process 8
-0.562000 - OS: preparing process 9
-0.562000 - OS: starting process 9
-0.562000 - Process 9: start processing action
-0.656000 - Process 9: end processing action
-0.656000 - OS: preparing process 11
-0.656000 - OS: starting process 11
-0.656000 - OS: preparing process 12
-0.656000 - OS: starting process 12
-0.656000 - Process 12: start processing action
-0.749000 - Process 12: end processing action
-0.749000 - OS: preparing process 10
-0.749000 - OS: starting process 10
-0.749000 - Process 10: start processing action
-0.842000 - Process 10: interrupt processing action
-0.842000 - OS: preparing process 13
-0.842000 - OS: starting process 13
-0.842000 - Process 13: start processing action
-0.921000 - Process 13: interrupt processing action
-0.921000 - OS: preparing process 14
-0.921000 - OS: starting process 14
-0.921000 - OS: preparing process 15
-0.921000 - OS: starting process 15
-0.921000 - Process 15: start processing action
-0.999000 - Process 15: end processing action
-1.077000 - Process 2: end hard drive output
-1.077000 - Process 1: end processing action
-1.077000 - OS: process 1 completed
-1.077000 - Process 8: start hard drive output on HDD 0
-1.077000 - OS: process 2 completed
-1.156000 - Process 7: end processing action
-1.156000 - OS: process 7 completed
+0.000000 - OS: preparing process 1
+0.000000 - OS: starting process 1
+0.000000 - Process 1: start processing action
+0.093000 - Process 1: interrupt processing action
+0.093000 - OS: preparing process 2
+0.093000 - OS: starting process 2
+0.093000 - OS: preparing process 3
+0.093000 - OS: starting process 3
+0.093000 - Process 3: start processing action
+0.093000 - Process 2: start hard drive output on HDD 0
+0.156000 - Process 3: end processing action
+0.156000 - Process 3: start keyboard input
+0.234000 - Process 1: end processing action
+0.234000 - OS: process 1 completed
+0.234000 - OS: preparing process 4
+0.234000 - OS: starting process 4
+0.234000 - Process 4: start processing action
+0.312000 - Process 4: interrupt processing action
+0.312000 - OS: preparing process 5
+0.312000 - OS: starting process 5
+0.312000 - OS: preparing process 6
+0.312000 - OS: starting process 6
+0.312000 - Process 6: start processing action
+0.312000 - Process 5: start hard drive output on HDD 1
+0.405000 - Process 6: end processing action
+0.405000 - OS: preparing process 7
+0.405000 - OS: starting process 7
+0.405000 - Process 7: start processing action
+0.499000 - Process 7: interrupt processing action
+0.499000 - OS: preparing process 8
+0.499000 - OS: starting process 8
+0.499000 - OS: preparing process 9
+0.499000 - OS: starting process 9
+0.499000 - Process 9: start processing action
+0.593000 - Process 9: end processing action
+0.593000 - OS: preparing process 10
+0.593000 - OS: starting process 10
+0.593000 - Process 10: start processing action
+0.687000 - Process 10: interrupt processing action
+0.687000 - OS: preparing process 11
+0.687000 - OS: starting process 11
+0.687000 - OS: preparing process 12
+0.687000 - OS: starting process 12
+0.687000 - Process 12: start processing action
+0.780000 - Process 12: end processing action
+0.780000 - OS: preparing process 13
+0.780000 - OS: starting process 13
+0.780000 - Process 13: start processing action
+0.875000 - Process 13: interrupt processing action
+0.875000 - OS: preparing process 14
+0.875000 - OS: starting process 14
+0.875000 - OS: preparing process 15
+0.875000 - OS: starting process 15
+0.875000 - Process 15: start processing action
+0.952000 - Process 15: end processing action
+1.015000 - Process 4: end processing action
+1.015000 - Process 2: end hard drive output
+1.030000 - OS: process 4 completed
+1.030000 - Process 8: start hard drive output on HDD 0
+1.030000 - OS: process 2 completed
+1.108000 - Process 7: end processing action
+1.108000 - OS: process 7 completed
+1.187000 - Process 10: end processing action
+1.187000 - OS: process 10 completed
 1.234000 - Process 5: end hard drive output
-1.234000 - Process 11: start hard drive output on HDD 1
-1.234000 - Process 7: end processing action
-1.234000 - OS: process 7 completed
-1.234000 - OS: process 5 completed
-1.311000 - Process 3: end keyboard input
-1.311000 - Process 10: end processing action
-1.311000 - OS: process 10 completed
-1.311000 - Process 6: start keyboard input
-1.311000 - Process 3: allocating memory
-1.390000 - Process 3: memory allocated at 0x00000000
-1.390000 - Process 3: start processing action
-1.468000 - Process 3: end processing action
-1.468000 - OS: process 3 completed
-1.546000 - Process 13: end processing action
-1.546000 - OS: process 13 completed
-2.015000 - Process 8: end hard drive output
-2.015000 - Process 14: start hard drive output on HDD 0
-2.015000 - OS: process 8 completed
-2.156000 - Process 11: end hard drive output
-2.171000 - OS: process 11 completed
-2.421000 - Process 6: end keyboard input
-2.421000 - Process 9: start keyboard input
-2.421000 - Process 6: allocating memory
-2.484000 - Process 6: memory allocated at 0x00000080
-2.484000 - Process 6: start processing action
-2.546000 - Process 6: end processing action
-2.546000 - OS: process 6 completed
-2.968000 - Process 14: end hard drive output
-2.968000 - OS: process 14 completed
-3.530000 - Process 9: end keyboard input
-3.530000 - Process 12: start keyboard input
-3.530000 - Process 9: allocating memory
-3.577000 - Process 9: memory allocated at 0x00000100
-3.577000 - Process 9: start processing action
-3.609000 - Process 9: end processing action
-3.625000 - OS: process 9 completed
-4.655000 - Process 12: end keyboard input
-4.655000 - Process 12: allocating memory
-4.655000 - Process 15: start keyboard input
-4.702000 - Process 12: memory allocated at 0x00000180
-4.702000 - Process 12: start processing action
-4.749000 - Process 12: end processing action
-4.749000 - OS: process 12 completed
-5.780000 - Process 15: end keyboard input
-5.780000 - Process 15: allocating memory
-5.843000 - Process 15: memory allocated at 0x00000200
-5.843000 - Process 15: start processing action
-5.874000 - Process 15: end processing action
-5.874000 - OS: process 15 completed
-5.874000 - Simulator Program ending
+1.234000 - Process 13: end processing action
+1.265000 - Process 3: end keyboard input
+1.265000 - Process 11: start hard drive output on HDD 1
+1.265000 - OS: process 13 completed
+1.265000 - Process 6: start keyboard input
+1.265000 - Process 3: allocating memory
+1.342000 - Process 3: memory allocated at 0x00000000
+1.342000 - Process 3: start processing action
+1.421000 - Process 3: end processing action
+1.421000 - OS: process 3 completed
+1.421000 - OS: process 5 completed
+1.968000 - Process 8: end hard drive output
+1.968000 - Process 14: start hard drive output on HDD 0
+1.968000 - OS: process 8 completed
+2.202000 - Process 11: end hard drive output
+2.202000 - OS: process 11 completed
+2.390000 - Process 6: end keyboard input
+2.390000 - Process 9: start keyboard input
+2.390000 - Process 6: allocating memory
+2.453000 - Process 6: memory allocated at 0x00000080
+2.453000 - Process 6: start processing action
+2.514000 - Process 6: end processing action
+2.514000 - OS: process 6 completed
+2.890000 - Process 14: end hard drive output
+2.890000 - OS: process 14 completed
+3.499000 - Process 9: end keyboard input
+3.499000 - Process 9: allocating memory
+3.499000 - Process 12: start keyboard input
+3.546000 - Process 9: memory allocated at 0x00000100
+3.546000 - Process 9: start processing action
+3.577000 - Process 9: end processing action
+3.593000 - OS: process 9 completed
+4.624000 - Process 12: end keyboard input
+4.624000 - Process 12: allocating memory
+4.624000 - Process 15: start keyboard input
+4.671000 - Process 12: memory allocated at 0x00000180
+4.671000 - Process 12: start processing action
+4.718000 - Process 12: end processing action
+4.718000 - OS: process 12 completed
+5.749000 - Process 15: end keyboard input
+5.749000 - Process 15: allocating memory
+5.812000 - Process 15: memory allocated at 0x00000200
+5.812000 - Process 15: start processing action
+5.843000 - Process 15: end processing action
+5.843000 - OS: process 15 completed
+5.843000 - Simulator Program ending
