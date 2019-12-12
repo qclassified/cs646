@@ -79,14 +79,14 @@ int memqfront = 0, memqrear = -1, inmemq = 0;
 
 /* Function Declarations */
 
-// ========= Memory Heap & Swap Functions =========
+// ========= Memory FIFO Queue & Swap Functions =========
 
 bool memqisempty();                                        // True if memory full (memory heap empty)
 bool memqisfull();                                         // Memory address space = MEMQMAX blocks, error if more memory blocks
 bool memqput(int memblk);                                  // put memory block at end of memory queue
 int memqpeek();                                            // peek front of memory queue
-int memqget();                                             // get memory block from front of memory queu
-void memrecapture(struct PCB *pcb_ptr);                    // recapture memory allocated to process 
+int memqget();                                             // get memory block from front of memory queue
+void memrecapture(struct PCB *pcb_ptr);                    // recapture memory allocated to process (used when process exits)
 int memqswapnget();                                        // swap memory allocated to idle process into HDD and get it
 void memswapback(struct PCB *pcb_ptr);                     // swap back memory of ready process from HDD
                                                            
@@ -298,14 +298,14 @@ void simulationstart(){
                     _log("%.6f - Process %d: end memory blocking\n", now(), id);
                 } else if (streq(desc, "allocate")){
                     if (conf.memkb == 0)                                       // System Memory Size not given in config file
-                        logerror("Error -- system memory size not given in config file");
+                        logerror("Error -- system memory size not given in config file\n");
                     if (conf.memblk == 0)                                      // System Memory Block Size not given in config file
-                        logerror("Error -- memory block size not given in config file");
+                        logerror("Error -- memory block size not given in config file\n");
                     
                     _log("%.6f - Process %d: allocating memory\n", now(), id);
                     int loc = memqget();                                       // Get next available memory block from memory heap
                     if (loc == -1)                                             // System does not have enought memory for this process
-                        logerror("\nError -- System ran out of Memory");       // Even after swapping out all the other processes
+                        logerror("\nError -- System ran out of Memory\n");       // Even after swapping out all the other processes
                     
                     pcb.memblk[pcb.imemblk++] = loc;                           // Keep track of memory blocks assigned to this process
                     
@@ -342,23 +342,23 @@ void simulate(FILE *fmeta){
         pcb.burstms = pcb.burstms + inst.mstot;            // burst time of process
         pcb.inst[pcb.inum] = inst;                         // store instruction in PCB instruction array
         pcb.inum++;                                        // instruction count of process
-        if (pcb.inum == MAXPCBINUM) logerror("\nError in process # %d -- Exceeds maximum number of instructions: %d", procid, MAXPCBINUM);
+        if (pcb.inum == MAXPCBINUM) logerror("\nError in process # %d -- Exceeds maximum number of instructions: %d\n", procid, MAXPCBINUM);
         
         if (*inst.code == 'S'){           
             pcb.id = 0;                                    // OS or System processes have process id 0
             
             if (streq(inst.desc, "begin")){
                 if (oson)                                  // Error -- OS is already turned on
-                    logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot turn on OS because it is already on!", icount, inst.code, inst.desc, inst.c);
+                    logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot turn on OS because it is already on!\n", icount, inst.code, inst.desc, inst.c);
                 
                 oson = True;                               // OS on flag
                 pcb.priority = 0;                          // S{begin} has 0 priority; stays at beginning of min heap
             } else if (streq(inst.desc, "finish")) { 
                 if (!oson)                                 // Error -- OS is already shutdown
-                    logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot shutdown OS because it is already off!", icount, inst.code, inst.desc, inst.c);
+                    logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot shutdown OS because it is already off!\n", icount, inst.code, inst.desc, inst.c);
                 
                 if (inproc)                                // Error -- OS cannot be shutdown while reading a process
-                    logerror("\nError in meta instruction # %d : %s{%s}%d -- OS Shutdown during process # %d!", icount, inst.code, inst.desc, inst.c, procid);
+                    logerror("\nError in meta instruction # %d : %s{%s}%d -- OS Shutdown during process # %d!\n", icount, inst.code, inst.desc, inst.c, procid);
                 
                 oson = False;                              // OS shutdown flag
                 pcb.priority = INT_MAX;                    // S{finish} has INT_MAX priority; stays at end  of min heap
@@ -369,14 +369,14 @@ void simulate(FILE *fmeta){
         } else if ( *inst.code == 'A') {
             if (streq(inst.desc, "begin")){
                 if (!oson)                                 // Error -- process cannot be started while OS is shutdown
-                    logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot start process # %d because OS is shutdown!", icount, inst.code, inst.desc, inst.c, procid);
+                    logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot start process # %d because OS is shutdown!\n", icount, inst.code, inst.desc, inst.c, procid);
                 if (inproc)                                // Error -- new process cannot be started before finishing reading previous process
-                    logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot start reading new process before previous process terminates!", icount, inst.code, inst.desc, inst.c);
+                    logerror("\nError in meta instruction # %d : %s{%s}%d -- Cannot start reading new process before previous process terminates!\n", icount, inst.code, inst.desc, inst.c);
                 
                 inproc = True;
             } else if (streq(inst.desc, "finish")){
                 if (!inproc)                               // Error -- cannot terminate because no process is started
-                    logerror("\nError in meta instruction # %d : %s{%s}%d -- There is no started process to terminate!", icount, inst.code, inst.desc, inst.c);
+                    logerror("\nError in meta instruction # %d : %s{%s}%d -- There is no started process to terminate!\n", icount, inst.code, inst.desc, inst.c);
                 inproc = False;                            // Flag: reading a process
                 pcb.id = procid;                           // Process id == order of arrival in meta file
      
@@ -393,13 +393,13 @@ void simulate(FILE *fmeta){
                 else logerror("\nError in config -- Unknown scheduler: %s", conf.sched);
                 
                 procid++;                                  // process id count
-                if (procid == QMAX) logerror("\nMeta file exceeds maximum number of process: %d", QMAX);
+                if (procid == QMAX) logerror("\nError -- Meta file exceeds maximum number of process: %d\n", QMAX);
                 qput(pcb);                                 // Put PCB in PCB ready queue (min heap)
                 pcb = emptypcb;                            // Reinialize PCB for next process
             }
         } else {
             if (!inproc)                                   // Error -- Instruction must be inside A{begin} - A{finish} block
-                logerror("\nError in meta instruction # %d : %s{%s}%d -- Instruction is not inside a process block!", icount, inst.code, inst.desc, inst.c);
+                logerror("\nError in meta instruction # %d : %s{%s}%d -- Instruction is not inside a process block!\n", icount, inst.code, inst.desc, inst.c);
             
             if (*inst.code=='I' || *inst.code=='O') {
                 pcb.ionum++;                               // I/O instruction count (used for Priority Schedule)
@@ -408,8 +408,8 @@ void simulate(FILE *fmeta){
         
     } while(inst.status != NULLMETA);                      // NULLMETA = End of file
     
-    if (!start) logerror("Error in meta file -- 'Start Program Meta-Data Code:' not present");
-    if (!end) logerror("Error in meta file -- 'End Program Meta-Data Code.' not present");
+    if (!start) logerror("Error in meta file -- 'Start Program Meta-Data Code:' not present\n");
+    if (!end) logerror("Error in meta file -- 'End Program Meta-Data Code.' not present\n");
     
     simulationstart();                                     // Helper function to execute each PCB from ready queue       
 }
@@ -700,10 +700,10 @@ int verify(char *val, const char *part, const char *msg){
         if (streq(unit, "kbytes")) ;
         else if (streq(unit, "mbytes")) m = 1024;
         else if (streq(unit, "gbytes")) m = 1024*1024;
-        else logerror("\nError -- Invalid unit for '%s' %s: %s", part, msg, unit);
+        else logerror("\nError -- Invalid unit for '%s' %s: %s\n", part, msg, unit);
     } 
     else if (streq(msg, "cycle time") && !streq(unit, "msec"))
-        logerror("\nError in config file --  Invalid unit for '%s' %s: %s", part, msg, unit);
+        logerror("\nError in config file --  Invalid unit for '%s' %s: %s\n", part, msg, unit);
     
     if (isempty(val))                   // Missing cycle ms or memory kbytes
         logerror("\nError in config file -- Missing %s for '%s'\n", msg, part);
