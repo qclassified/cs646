@@ -29,7 +29,11 @@ Line 400: loadmeta_xtimes() calls loadmeta 5 times in loop wit 100ms interval
 Line 282 - 398: loadmeta() loads meta file 1 time
 Line 394: incremets sem_loadmeta after finishing loading meta file each time
 Line 414: gets value of how many times meta file has been loaded so far
-Line 411 - 423: endsimulation only if (1) meta file has been loaded 5 times and (2) READY queue is empty and (3) WAITING queue is empty and (4) no PCB is being transferred from one queue to another.
+Line 411 - 423: endsimulation only if 
+    (1) meta file has been loaded 5 times and 
+    (2) READY queue is empty and 
+    (3) WAITING queue is empty and 
+    (4) no PCB is being transferred from one queue to another.
 ```
 
 #### PCB READY queue and WAITING queue
@@ -40,7 +44,9 @@ Line 411 - 423: endsimulation only if (1) meta file has been loaded 5 times and 
 4. Multiple I/O can be done in parallel
 5. e.g. Different PCB can use keyboard, HDD 0, HDD 1, PRIN 0 and PRIN 1 in parallel
 6. However, different PCB cannot use HDD 0 at same time (due to mutex lock)
-7. Since, it is possible to write to both HDD 0 and HDD 1 at same time, total simulation takes significantly less time (approximately 5.6 seconds rahter than 23.4 seconds) to complete.
+7. Since, it is possible to write to both HDD 0 and HDD 1 at same time, 
+    total simulation takes significantly less time 
+    (approximately 5.6 seconds rahter than 23.4 seconds) to complete.
 
 ```
 Line 79 - 82: Global parameters for READY queue
@@ -55,7 +61,9 @@ Line 452 - 560: function for simulating READY queue
 Line 524 - 528: If I/O operation, change PCB state to WAITING and put on WAITING queue
 Line 426 - 450: function for simulating WAITING queue
 Line 440: get next PCB from WAITING queue
-Line 443: call I/O on new non-blocking thread so that multiple I/O can be performed in parallel (device is locked using mutex, so there will be no race condition)
+Line 443: call I/O on new non-blocking thread 
+    so that multiple I/O can be performed in parallel 
+    (device is locked using mutex, so there will be no race condition)
 Line 632 - 691: helper function for I/O
 Line 682: change pcb state to READY after I/O completion
 Line 685: put PCB into READY queue after I/O completion
@@ -86,7 +94,10 @@ The above output shows that hard drive output to HDD 0 and HDD 1 are performed c
 
 #### Shortest Time Remaining (STR) Scheduler
 ```
-Line 364: priority of PCB in STR is pcb.remms = total remaining time (ms) of PCB, process id is added to this value so that - if two processes have same reamining time (ms), the one that comes first will have higher priority
+Line 364: priority of PCB in STR is pcb.remms = total remaining time (ms) 
+    of PCB, process id is added to this value so that - 
+    if two processes have same reamining time (ms), 
+    the one that comes first will have higher priority
 ```
 
 
