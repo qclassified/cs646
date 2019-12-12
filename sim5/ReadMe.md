@@ -105,7 +105,9 @@ Line 364: priority of PCB in STR is pcb.remms = total remaining time (ms)
 ```
 Line 356 - 357: priority of PCB in RR = process id = order of arrival = same as FIFO,
 Line 706: rr_timer() generates intterupt (by setting mut_interrupt) in infinite loop
-Line 565 - 568: rr_timer() function is run on separate thread only if scheduler is RR, it keeps interrupting the process execution infinetly till end of program
+Line 565 - 568: rr_timer() function is run on separate thread only if 
+    scheduler is RR, it keeps interrupting the process execution 
+    infinetly till end of program
 Line 614: function for waiting miliseconds for a running process
 Line 621 - 626: if interrupt flag is set, run process for conf.quant = 50 ms. 
     conf.quant is the quantum number in milliseconds. 
@@ -115,7 +117,8 @@ Line 621 - 626: if interrupt flag is set, run process for conf.quant = 50 ms.
 Line 628: return how many ms the process was run for
 Line 504: get elapsed ms = how long PCB was run for
 Line 506: calculate remaining ms based on total and elapsed
-Line 510: if remms > 0, it means process was interrupted before completion, in that case make PCB status READY from RUNNING and put it at end of READY queue.
+Line 510: if remms > 0, it means process was interrupted before completion, 
+    in that case make PCB status READY from RUNNING and put it at end of READY queue.
 Line 513: since READY queue is a min heap, 
     pcb priority is incremented by 1000 to put it at end of mean heap. 
 Line 515: put PCB at end of READY queue
