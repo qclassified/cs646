@@ -44,7 +44,9 @@ Line 411 - 423: endsimulation only if
 4. Multiple I/O can be done in parallel
 5. e.g. Different PCB can use keyboard, HDD 0, HDD 1, PRIN 0 and PRIN 1 in parallel
 6. However, different PCB cannot use HDD 0 at same time (due to mutex lock)
-7. Since, it is possible to write to both HDD 0 and HDD 1 at same time, 
+7. Same PCB cannot be in both WAITING and READY queue
+    and cannot use 2 I/O devices in parallel
+8. Since, it is possible to write to both HDD 0 and HDD 1 at same time, 
     total simulation takes significantly less time 
     (approximately 5.6 seconds rahter than 23.4 seconds) to complete.
 
