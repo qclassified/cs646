@@ -36,7 +36,7 @@ Line 411 - 423: endsimulation only if
     (4) no PCB is being transferred from one queue to another.
 ```
 
-#### PCB READY queue and WAITING queue
+#### PCB READY and WAITING queue in parallel threads
 
 1. PCB READY queue and WAITING queue are simulated in separate threads
 2. If process is waiting for I/O completion it is moved to WAITING queue
