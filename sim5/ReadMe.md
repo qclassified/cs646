@@ -41,7 +41,7 @@ Line 411 - 423: endsimulation only if
 1. PCB READY queue and WAITING queue are simulated in separate threads
 2. If process is waiting for I/O completion it is moved to WAITING queue
 3. After I/O completion it is moved back to READY queue
-4. Multiple I/O can be done in parallel
+4. I/O thread is non-blocking, multiple I/O can be done in parallel
 5. e.g. Different PCB can use keyboard, HDD 0, HDD 1, PRIN 0 and PRIN 1 in parallel
 6. However, different PCB cannot use HDD 0 at same time (due to mutex lock)
 7. Same PCB cannot be in both WAITING and READY queue
