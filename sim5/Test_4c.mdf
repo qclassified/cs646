@@ -1,0 +1,41 @@
+Start Program Meta-Data Code:
+S{begin}0;  
+
+A{begin}0; 
+M{allocate}1; M{allocate}1; M{allocate}1; M{allocate}1;M{allocate}1;
+M{allocate}1; M{allocate}1; M{allocate}1; M{allocate}1;M{allocate}1;
+M{allocate}1; M{allocate}1; M{allocate}1; M{allocate}1;M{allocate}1;
+M{allocate}1; M{allocate}1; M{allocate}1;
+I{keyboard}1;
+I{keyboard}1;
+
+ A{finish}0;
+
+A{begin}0; M{allocate}10; A{finish}0; 
+
+A{begin}0; M{allocate}1; M{allocate}1; A{finish}0; 
+
+A{begin}0; M{allocate}1; M{allocate}1; A{finish}0;
+
+A{begin}0; M{allocate}1; M{allocate}1; A{finish}0;
+
+A{begin}0; M{allocate}1; M{allocate}1; A{finish}0;
+
+A{begin}0; M{allocate}1; M{allocate}1; A{finish}0;
+
+A{begin}0; M{allocate}10; A{finish}0; 
+
+A{begin}0; M{allocate}10; A{finish}0; 
+
+A{begin}0; A{finish}0; 
+
+A{begin}0; A{finish}0; 
+
+
+S{finish}0.
+End Program Meta-Data Code.
+
+
+
+
+
