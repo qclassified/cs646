@@ -29,7 +29,7 @@ Line 400: loadmeta_xtimes() calls loadmeta 5 times in loop wit 100ms interval
 Line 282 - 398: loadmeta() loads meta file 1 time
 Line 394: incremets sem_loadmeta after finishing loading meta file each time
 Line 414: gets value of how many times meta file has been loaded so far
-Line 411 - 423: endssimulation loop only if (1) meta file has been loaded 5 times and (2) READY queue is empty and (3) WAITING queue is empty and (4) no PCB is being transferred from one queue to another.
+Line 411 - 423: endsimulation only if (1) meta file has been loaded 5 times and (2) READY queue is empty and (3) WAITING queue is empty and (4) no PCB is being transferred from one queue to another.
 ```
 
 #### PCB READY queue and WAITING queue
